@@ -1,0 +1,21 @@
+{
+  "name": "DearSelf",
+  "short_name": "DearSelf",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fff8fc",
+  "theme_color": "#e8779f",
+  "description": "A cozy personal dashboard for your days, thoughts and everything in between.",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
