@@ -301,15 +301,15 @@ body{font-family:var(--dearself-selected-font)!important}
 <style id="dearself-v39-font-modal-click-layer">#modalWrap{z-index:2147482000}#dearselfFontList{pointer-events:auto!important}</style><style>.ds-quick-row{display:grid;grid-template-columns:1fr 2fr auto;gap:8px;align-items:center}.ds-quick-row input{min-width:0}@media(max-width:700px){.ds-quick-row{grid-template-columns:1fr}.ds-quick-row .ql-remove{width:100%}}</style>
 </head>
 <body>
-<!-- DearSelf V44.4 FIXED BUILD MARKER -->
+<!-- DearSelf V45.4 COMPACT SETTINGS + CUSTOM REMINDERS BUILD -->
 
 <div id="root"><div class="login"><div class="auth-card"><div class="auth-logo">📔</div><h1>Loading DearSelf…</h1><p>Please wait a moment.</p></div></div></div>
 <div id="modalWrap" class="modal-wrap"><div id="modal" class="modal"></div></div>
 <div id="toast" class="toast"></div><div id="dsHelpBot" class="ds-helpbot" aria-label="DearSelf Help Bot"><div class="ds-hb-head"><div class="ds-hb-avatar">✦</div><div style="min-width:0"><h3>DearSelf Help Bot</h3><div class="small muted">Your in-app helper · can do things for you</div></div><button class="ds-hb-conv-toggle" id="dsHelpConvToggle" type="button" title="Conversations" aria-label="Open conversations">☰</button><span class="ds-hb-badge">BETA</span><button class="ds-hb-close" onclick="toggleHelpBot(false)">×</button></div><div class="ds-hb-layout"><aside id="dsHelpHistory" class="ds-hb-history"><div class="ds-hb-history-top"><button class="ds-hb-new" id="dsHelpNewConversation" type="button">＋ New conversation</button><div id="dsHelpHistoryCount" class="ds-hb-history-count"></div></div><div id="dsHelpConvs" class="ds-hb-convs"></div></aside><div class="ds-hb-chatcol"><div id="dsHelpMsgs" class="ds-hb-msgs"></div><div class="ds-hb-input"><textarea id="dsHelpInput" placeholder="Tell me what you want to do…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendHelpBot()}"></textarea><button class="ds-hb-send" onclick="sendHelpBot()">Send</button></div></div></div></div><button id="dsHelpFab" class="ds-helpbot-fab" onclick="toggleHelpBot()" title="DearSelf Help Bot">✦</button>
 <script>
 
-const DEARSELF_VERSION = "V44.4 Beta";
-const DEARSELF_VERSION_NUMBER = 44.4;
+const DEARSELF_VERSION = "V46.1 Beta";
+const DEARSELF_VERSION_NUMBER = 45.6;
 window.DEARSELF_VERSION = DEARSELF_VERSION;
 window.DEARSELF_VERSION_NUMBER = DEARSELF_VERSION_NUMBER;
 
@@ -322,7 +322,7 @@ const DEFAULT={
  courses:[],assignments:[],exams:[],grades:[],study:[],studySessions:[],schoolTodos:[],courseNotes:[],
  journalEntries:[],journalStickers:[],
  timetable:[],activity:[],monthlyBudget:0,
- externalAccounts:[], notifications:[], notificationSettings:{study:true,timetable:true,assignments:true,exams:true,todo:true,calendar:true,updates:true,leadMinutes:5,notify5Minutes:true,notify5Seconds:false}, focusSessions:[], habits:[], analyticsPrefs:{}, homeWidgets:{}, privacySettings:{autoLock:false}, universalFiles:[],homeBannerImage:"",homeBannerText:"A calm mind creates a beautiful life. ♡",homeGalleryImage:"",homeQuickLinks:[]
+ externalAccounts:[], notifications:[], notificationSettings:{study:true,timetable:true,assignments:true,exams:true,todo:true,calendar:true,updates:true,leadMinutes:5,notify5Minutes:true,notify5Seconds:false,customReminders:[]} , focusSessions:[], habits:[], analyticsPrefs:{}, homeWidgets:{}, privacySettings:{autoLock:false}, universalFiles:[],homeBannerImage:"",homeBannerText:"A calm mind creates a beautiful life. ♡",homeGalleryImage:"",homeQuickLinks:[]
 };
 let state=load(), currentPage="Home", calCursor=new Date(); calCursor.setDate(1); let calView="month";
 let stickerCursor=new Date(), stickerView='week';
@@ -468,7 +468,7 @@ function shell(){
    <div class="sidebar-bottom">${state.passwordHash&&state.passwordMode!=="every"?'<button class="nav-btn" onclick="lockNow()"><span class="nav-icon">🔒</span> Lock now</button>':""}<button class="nav-btn" onclick="logout()"><span class="nav-icon">↪</span> Log out</button></div>
  </aside>
  <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
- <main class="main"><div class="topbar"><button class="icon-btn menu-btn" onclick="toggleSidebar()">☰</button><div class="search"><input id="globalSearch" placeholder="Search everything…" onkeydown="if(event.key==='Enter')doGlobalSearch(this.value)"></div><div class="top-actions"><button class="icon-btn" onclick="quickAdd()">＋</button><button class="icon-btn" onclick="show('Settings')">⚙</button><button class="profile-avatar" onclick="show('Settings')" title="Profile">${state.profilePhoto?`<img src="${esc(state.profilePhoto)}" alt="Profile">`:`${esc((state.username||"D").charAt(0).toUpperCase())}`}</button></div></div><div id="content"></div></main>
+ <main class="main"><div class="topbar"><button class="icon-btn menu-btn" onclick="toggleSidebar()">☰</button><div class="search"><input id="globalSearch" placeholder="Search everything…" onkeydown="if(event.key==='Enter')doGlobalSearch(this.value)"></div><div class="top-actions"><button class="icon-btn" onclick="quickAdd()">＋</button><button class="icon-btn" onclick="openDearSelfSettings()">⚙</button><button class="profile-avatar" onclick="openDearSelfSettings()" title="Profile">${state.profilePhoto?`<img src="${esc(state.profilePhoto)}" alt="Profile">`:`${esc((state.username||"D").charAt(0).toUpperCase())}`}</button></div></div><div id="content"></div></main>
  </div>`;
  show(currentPage);
  updateSidebarState();
@@ -504,7 +504,24 @@ function updateSidebarState(){
 function navGroup(label,pages){return `<div class="nav-label">${label}</div>`+pages.map(p=>`<button class="nav-btn" data-page="${p}" onclick="show('${p}')"><span class="nav-icon">${icons[p]||"•"}</span>${p}</button>`).join("")}
 const icons={Home:"⌂",Search:"⌕",Calendar:"▣",Tasks:"✓",Notes:"✎","Goals & Habits":"◎",Focus:"◷",Finances:"$",Entertainment:"♫",School:"▤",Personal:"♡",Journal:"✎",Settings:"⚙",About:"ⓘ"};
 function toggleSidebar(){state.sidebar=!state.sidebar;save();updateSidebarState()}
-function show(p){clearTimeout(window.__studyTimer);window.__studyTimer=null;currentPage=p;nav();const c=document.getElementById("content");if(!c)return;({Home:home,Search:searchPage,Calendar:calendarPage,Tasks:tasksPage,Notes:notesPage,"Goals & Habits":goalsPage,Insights:insightsPage,Focus:focusPage,Files:filesPage,Notifications:notificationsPage,Finances:financePage,Entertainment:entPage,School:schoolPage,Personal:personalPage,Journal:journalHomePage,Stickerfy:stickerfyPage,Settings:settingsPage,About:aboutPage}[p]||home)();c.classList.remove("content-animate");void c.offsetWidth;c.classList.add("content-animate")}
+function show(p){clearTimeout(window.__studyTimer);window.__studyTimer=null;currentPage=p;nav();const c=document.getElementById("content");if(!c)return;({Home:home,Search:searchPage,Calendar:calendarPage,Tasks:tasksPage,Notes:notesPage,"Goals & Habits":goalsPage,Insights:insightsPage,Focus:focusPage,Files:filesPage,Notifications:notificationsPage,Finances:financePage,Entertainment:entPage,School:schoolPage,Personal:personalPage,Journal:journalHomePage,Stickerfy:stickerfyPage,Settings:openDearSelfSettings,About:aboutPage}[p]||home)();c.classList.remove("content-animate");void c.offsetWidth;c.classList.add("content-animate")}
+function openDearSelfSettings(){
+  clearTimeout(window.__studyTimer);window.__studyTimer=null;currentPage="Settings";nav();
+  const c=document.getElementById("content");if(!c)return;
+  let rendered=false;
+  try{if(typeof window.settingsPage==='function'){window.settingsPage();rendered=true;}else if(typeof settingsPage==='function'){settingsPage();rendered=true;}}catch(err){
+    console.error("DearSelf Settings renderer failed:",err);
+    try{if(typeof settingsPage==='function'){settingsPage();rendered=true;}}catch(err2){console.error("DearSelf base Settings renderer failed:",err2);}
+  }
+  // Safety net: even if an extension/wrapper fails, Settings itself and the reminder controls still appear.
+  if(!rendered || !c.innerHTML.trim()){
+    c.innerHTML=pageHead("Settings","A full control center.")+`<div class="panel"><h2>Settings</h2><p class="small muted">Your Settings loaded in safe mode. Your existing data is still here.</p></div>`;
+  }
+  // Reminder settings are rendered inside the authoritative Settings renderer.
+  // Do not append a second standalone notification panel here.
+  c.classList.remove("content-animate");void c.offsetWidth;c.classList.add("content-animate");
+  if(window.innerWidth<=900)closeSidebar();
+}
 function pageHead(title,sub=""){
   return `<section class="ds-page-hero"><div class="ds-page-hero-copy"><div class="ds-eyebrow">DEARSELF ♡</div><h1 class="page-title">${title} <span class="ds-title-heart">♡</span></h1>${sub?`<p class="subtitle">${sub}</p>`:""}</div><div class="ds-page-hero-art" aria-hidden="true"><span>✦</span><span>♡</span><span>✿</span><span>⌁</span><div class="ds-hero-stack"><i></i><i></i><i></i></div></div></section>`
 }
@@ -1546,8 +1563,8 @@ function themeGroups(){return Object.entries(THEME_GROUPS).map(([g,names])=>`<di
 // --- DATA BACKUP & RESTORE ---
 
 function profileAvatarMarkup(size='lg'){return `<div class="profile-avatar ${size}">${state.profilePhoto?`<img src="${esc(state.profilePhoto)}" alt="Profile photo">`:`${esc((state.username||"D").charAt(0).toUpperCase())}`}</div>`}
-function profilePhotoPick(){let i=document.createElement('input');i.type='file';i.accept='image/png,image/jpeg,image/webp,image/gif';i.onchange=()=>{let f=i.files&&i.files[0];if(!f)return;if(f.size>4*1024*1024)return alert('Please choose an image under 4 MB.');let r=new FileReader();r.onload=()=>{state.profilePhoto=r.result;save();shell();show('Settings');toast('Profile photo updated')};r.readAsDataURL(f)};i.click()}
-function removeProfilePhoto(){state.profilePhoto='';save();shell();show('Settings');toast('Profile photo removed')}
+function profilePhotoPick(){let i=document.createElement('input');i.type='file';i.accept='image/png,image/jpeg,image/webp,image/gif';i.onchange=()=>{let f=i.files&&i.files[0];if(!f)return;if(f.size>4*1024*1024)return alert('Please choose an image under 4 MB.');let r=new FileReader();r.onload=()=>{state.profilePhoto=r.result;save();shell();openDearSelfSettings();toast('Profile photo updated')};r.readAsDataURL(f)};i.click()}
+function removeProfilePhoto(){state.profilePhoto='';save();shell();openDearSelfSettings();toast('Profile photo removed')}
 function aboutPage(){document.getElementById("content").innerHTML=`<div class="content-animate">
   <h1 class="page-title">About</h1>
   <p class="subtitle">A little note about DearSelf.</p>
@@ -1625,7 +1642,7 @@ function saveHomeBannerText(){state.homeBannerText=document.getElementById('home
 function removeHomeBannerImage(){state.homeBannerImage='';save();closeModal();show('Home');toast('Banner picture removed ♡')}
 function openHomeGallerySettings(){pickHomeImage('gallery')}
 function showQuickLinksSettings(){
-  show('Settings');
+  openDearSelfSettings();
   setTimeout(()=>document.getElementById('dsQuickLinksPanel')?.scrollIntoView({behavior:'smooth',block:'center'}),100);
 }
 function addQuickLinkRow(label='',url=''){
@@ -1671,33 +1688,79 @@ function settingsPage(){
         </div>
       </div>
     </div>
-    <div class="panel" style="margin-top:15px">
-      <div class="row between"><div><h2>🖼️ Home Pictures & Banner</h2><p class="small muted">Make the picture areas on your Home page completely yours.</p></div><button class="btn" onclick="show('Home')">View Home</button></div>
-      <div class="actions" style="margin-top:12px">
-        <button class="btn" onclick="openHomeBannerSettings()">🖼️ Customize banner</button>
-        <button class="btn" onclick="openHomeGallerySettings()">📷 Change Gallery picture</button>
+    <div class="panel ds-collapsible-panel" style="margin-top:15px">
+      <div class="row between" style="gap:12px;align-items:center"><div><h2 style="margin:0">🖼️ Home Pictures & Banner</h2><p class="small muted" style="margin:4px 0 0">Banner and Gallery picture controls.</p></div><button type="button" class="btn" id="dsHomePicturesToggle" onclick="toggleDearSelfSettingsSection('dsHomePicturesConfig','dsHomePicturesToggle','Show picture options','Hide picture options')">Show picture options</button></div>
+      <div id="dsHomePicturesConfig" style="display:none;margin-top:15px">
+        <div class="actions">
+          <button class="btn" onclick="show('Home')">View Home</button>
+          <button class="btn" onclick="openHomeBannerSettings()">🖼️ Customize banner</button>
+          <button class="btn" onclick="openHomeGallerySettings()">📷 Change Gallery picture</button>
+        </div>
+        ${state.homeBannerImage?'<p class="small muted" style="margin-top:10px">✓ Banner picture set</p>':'<p class="small muted" style="margin-top:10px">No banner picture selected yet.</p>'}
+        ${state.homeGalleryImage?'<p class="small muted">✓ Gallery picture set</p>':'<p class="small muted">No Gallery picture selected yet.</p>'}
       </div>
-      ${state.homeBannerImage?'<p class="small muted" style="margin-top:10px">✓ Banner picture set</p>':'<p class="small muted" style="margin-top:10px">No banner picture selected yet.</p>'}
-      ${state.homeGalleryImage?'<p class="small muted">✓ Gallery picture set</p>':'<p class="small muted">No Gallery picture selected yet.</p>'}
     </div>
-    <div class="panel" id="dsQuickLinksPanel" style="margin-top:15px">
-      <h2>🔗 Quick Links</h2>
-      <p class="small muted">Add links you use often. If this is empty, Home will guide you back here.</p>
-      <div id="dsQuickLinksRows" style="display:grid;gap:8px"></div>
-      <div class="actions" style="margin-top:10px"><button class="btn" type="button" onclick="addQuickLinkRow()">＋ Add link</button><button class="btn primary" type="button" onclick="saveQuickLinksSettings()">Save Quick Links</button></div>
-      <p class="small muted" style="margin-top:10px">Tip: include <b>https://</b> at the beginning of each link.</p>
-    </div>
-    <div class="panel" style="margin-top:15px">
-      <h2>Appearance</h2>
-      <div class="form-grid">
-        <div class="field"><label>Start page</label><select onchange="state.startPage=this.value;save()">${["Home","Calendar","Tasks","Notes","Goals & Habits","Finances","Entertainment","School","Personal"].map(x=>`<option ${state.startPage===x?"selected":""}>${x}</option>`).join("")}</select></div>
-        <div class="field full"><label>Text size — ${state.textSize}px</label><input type="range" min="10" max="30" value="${state.textSize}" oninput="state.textSize=Number(this.value);save();cssTheme();this.previousElementSibling.textContent='Text size — '+this.value+'px'"></div>
+    <div class="panel ds-collapsible-panel" id="dsQuickLinksPanel" style="margin-top:15px">
+      <div class="row between" style="gap:12px;align-items:center"><div><h2 style="margin:0">🔗 Quick Links</h2><p class="small muted" style="margin:4px 0 0">Links you use often.</p></div><button type="button" class="btn" id="dsQuickLinksToggle" onclick="toggleDearSelfSettingsSection('dsQuickLinksConfig','dsQuickLinksToggle','Show Quick Links','Hide Quick Links')">Show Quick Links</button></div>
+      <div id="dsQuickLinksConfig" style="display:none;margin-top:15px">
+        <p class="small muted">If this is empty, Home will guide you back here.</p>
+        <div id="dsQuickLinksRows" style="display:grid;gap:8px"></div>
+        <div class="actions" style="margin-top:10px"><button class="btn" type="button" onclick="addQuickLinkRow()">＋ Add link</button><button class="btn primary" type="button" onclick="saveQuickLinksSettings()">Save Quick Links</button></div>
+        <p class="small muted" style="margin-top:10px">Tip: include <b>https://</b> at the beginning of each link.</p>
       </div>
-      <div class="field" style="margin-top:14px;max-width:420px">
-        <label>Fonts</label>
-        <button type="button" class="btn primary" style="width:100%;justify-content:space-between;position:relative;z-index:20;pointer-events:auto" onclick="openDearSelfFonts();return false"><span>🔤 Fonts</span><span class="muted">${esc(state.fontFamily||'Inter')} ›</span></button>
-      </div><div style="margin-top:18px"><label class="small muted">Theme</label>${themeGroups()}</div></div>
-    
+    </div>
+    <div class="panel ds-collapsible-panel" style="margin-top:15px">
+      <div class="row between" style="gap:12px;align-items:center"><div><h2 style="margin:0">Appearance</h2><p class="small muted" style="margin:4px 0 0">Start page, text size, fonts and themes.</p></div><button type="button" class="btn" id="dsAppearanceToggle" onclick="toggleDearSelfSettingsSection('dsAppearanceConfig','dsAppearanceToggle','Show appearance options','Hide appearance options')">Show appearance options</button></div>
+      <div id="dsAppearanceConfig" style="display:none;margin-top:15px">
+        <div class="form-grid">
+          <div class="field"><label>Start page</label><select onchange="state.startPage=this.value;save()">${["Home","Calendar","Tasks","Notes","Goals & Habits","Finances","Entertainment","School","Personal"].map(x=>`<option ${state.startPage===x?"selected":""}>${x}</option>`).join("")}</select></div>
+          <div class="field full"><label>Text size — ${state.textSize}px</label><input type="range" min="10" max="30" value="${state.textSize}" oninput="state.textSize=Number(this.value);save();cssTheme();this.previousElementSibling.textContent='Text size — '+this.value+'px'"></div>
+        </div>
+        <div class="field" style="margin-top:14px;max-width:520px"><label>Fonts</label><button type="button" class="btn" style="width:100%;justify-content:space-between" onclick="openDearSelfFonts();return false"><span>🔤 Show all fonts</span><span class="muted">${esc(state.fontFamily||'Inter')} ›</span></button></div>
+        <div style="margin-top:18px"><div class="row between" style="gap:10px"><label class="small muted">Theme</label><button type="button" class="btn" onclick="toggleDearSelfSettingsSection('dsThemeConfig','dsThemeToggle','Show all themes','Hide themes')" id="dsThemeToggle">Show all themes</button></div><div id="dsThemeConfig" style="display:none;margin-top:10px">${themeGroups()}</div></div>
+      </div>
+    </div>
+
+    <div class="panel ds-collapsible-panel" style="margin-top:15px">
+      <div class="row between" style="gap:12px;align-items:center"><div><h2 style="margin:0">🔔 Notifications</h2><p class="small muted" style="margin:4px 0 0">Choose what DearSelf reminds you about and when.</p></div><button type="button" class="btn primary" id="dsNotificationsToggle" onclick="toggleDearSelfSettingsSection('dsNotificationConfig','dsNotificationsToggle','Configure notifications','Hide notification settings')">Configure notifications</button></div>
+      <div id="dsNotificationConfig" style="display:none;margin-top:15px">
+        <div class="row between" style="gap:10px;align-items:center"><b>What should I be reminded about?</b><button class="btn" type="button" onclick="requestDearSelfNotificationPermission()">🔔 Enable device notifications</button></div>
+        <div class="ds-widget-settings" style="margin-top:9px">${['study|⏱ Study sessions','timetable|📅 Timetable classes','assignments|📝 Assignments','exams|🎓 Exams','calendar|🗓 Calendar events','todo|✓ To-do / tasks','updates|↻ DearSelf updates'].map(x=>{const [k,l]=x.split('|');return `<label class="switch-row"><span>${l}</span><input type="checkbox" ${state.notificationSettings?.[k]!==false?'checked':''} onchange="setNotificationSetting('${k}',this.checked)"></label>`}).join('')}</div>
+        <div style="margin-top:18px;padding-top:17px;border-top:1px solid var(--border)">
+          <div class="row between" style="gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h3 style="margin:0 0 4px">🧠 Reminder timing</h3><p class="small muted" style="margin:0">Pick as many as you want. Add your own times too.</p></div><span class="tag" id="dsReminderCount">0 selected</span></div>
+          <div class="actions" style="margin:13px 0 11px;gap:7px;flex-wrap:wrap">
+            <button type="button" id="dsReminderPresetMinimal" class="btn" onclick="setDearSelfReminderPreset('minimal')">Just before · 5m</button>
+            <button type="button" id="dsReminderPresetStandard" class="btn" onclick="setDearSelfReminderPreset('standard')">Standard · 1h + 5m</button>
+            <button type="button" id="dsReminderPresetMemory" class="btn" onclick="setDearSelfReminderPreset('memory')">🧠 Memory mode</button>
+            <button type="button" id="dsReminderPresetFull" class="btn" onclick="setDearSelfReminderPreset('full')">Everything</button>
+            <button type="button" class="btn ghost" onclick="clearDearSelfReminderTimings()">Clear</button>
+          </div>
+          <div id="dsReminderTimingGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:9px">${[
+            ['notify5d','📆 5 days before','Long-term heads-up'],['notify1d','🗓 1 day before','Long-term heads-up'],['notify5h','🌤 5 hours before','Same-day reminder'],['notify1h','⏰ 1 hour before','Same-day reminder'],['notify5m','🔔 5 minutes before','Last-minute'],['notify1m','⏱ 1 minute before','Last-minute'],['notify5s','⚡ 5 seconds before','Right before'],['notify1s','✨ 1 second before','At the start']
+          ].map(([key,label,sub])=>{const on=state.notificationSettings?.[key]===true;return `<label class="ds-reminder-option" style="display:flex;align-items:center;gap:11px;padding:13px;border:1px solid ${on?'var(--accent)':'var(--border)'};border-radius:15px;background:var(--card);cursor:pointer"><input type="checkbox" ${on?'checked':''} onchange="setNotificationTiming('${key}',this.checked);this.closest('.ds-reminder-option').style.borderColor=this.checked?'var(--accent)':'var(--border)';updateDearSelfReminderCount();updateDearSelfReminderPresetButtons()"><span><b>${label}</b><small class="muted" style="display:block;margin-top:3px">${sub}</small></span></label>`}).join('')}</div>
+          <div style="margin-top:15px;padding:14px;border:1px solid var(--border);border-radius:16px;background:var(--card)">
+            <div class="row between" style="gap:10px;align-items:center;flex-wrap:wrap">
+              <div><b>Custom reminders</b><div class="small muted">Make your own timing — decimals are allowed.</div></div>
+              <button type="button" class="btn" id="dsCustomReminderToggle" onclick="toggleDearSelfCustomReminderEditor()">＋ Add custom reminder</button>
+            </div>
+            <div id="dsCustomReminderEditor" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+              <div class="small muted" style="margin-bottom:8px">Examples: <b>10 days</b> · <b>3.5 hours</b> · <b>8 minutes</b> · <b>10 seconds</b></div>
+              <div class="actions" style="gap:8px;flex-wrap:wrap;align-items:center">
+                <input id="dsCustomReminderAmount" type="number" min="0.1" step="0.1" inputmode="decimal" placeholder="Amount" aria-label="Custom reminder amount" style="width:130px">
+                <select id="dsCustomReminderUnit" aria-label="Custom reminder unit" style="width:140px">
+                  <option value="seconds">seconds</option><option value="minutes" selected>minutes</option><option value="hours">hours</option><option value="days">days</option><option value="weeks">weeks</option>
+                </select>
+                <button type="button" class="btn primary" onclick="addDearSelfCustomReminder()">＋ Add</button>
+                <button type="button" class="btn ghost" onclick="toggleDearSelfCustomReminderEditor(false)">Done</button>
+              </div>
+            </div>
+            <div id="dsCustomReminderList" style="display:grid;gap:7px;margin-top:10px"></div>
+          </div>
+          <div style="margin-top:12px;padding:12px 14px;border-radius:15px;background:color-mix(in srgb,var(--accent) 8%,var(--card));border:1px solid color-mix(in srgb,var(--accent) 18%,var(--border))"><b>🧠 Memory mode</b><span class="small muted"> 1 day + 1 hour + 5 minutes + 1 minute + 5 seconds.</span></div>
+          <p class="small muted" style="margin:10px 0 0">Very short push reminders can be delayed by the browser, operating system, or push service.</p>
+        </div>
+      </div>
+    </div>
     <div class="panel" style="margin-top:15px">
       <div class="row between"><div><h2>🔔 Notifications</h2><p class="small muted">Remind me about the things I can schedule inside DearSelf.</p></div><button class="btn" onclick="requestDearSelfNotificationPermission()">Enable device notifications</button></div>
       <div class="ds-widget-settings" style="margin-top:10px">
@@ -1709,15 +1772,29 @@ function settingsPage(){
         <label class="switch-row"><span>✓ To-do / tasks</span><input type="checkbox" ${state.notificationSettings?.todo!==false?'checked':''} onchange="setNotificationSetting('todo',this.checked)"></label>
         <label class="switch-row"><span>↻ DearSelf updates</span><input type="checkbox" ${state.notificationSettings?.updates!==false?'checked':''} onchange="setNotificationSetting('updates',this.checked)"></label>
       </div>
-      <div class="field" style="margin-top:12px">
-        <label>When should DearSelf notify you?</label>
-        <div class="ds-widget-settings" style="margin-top:8px">
-          <label class="switch-row"><span>⏰ 5 minutes before</span><input type="checkbox" ${state.notificationSettings?.notify5Minutes!==false?'checked':''} onchange="setNotificationTiming('notify5Minutes',this.checked)"></label>
-          <label class="switch-row"><span>⚡ 5 seconds before / right before</span><input type="checkbox" ${state.notificationSettings?.notify5Seconds===true?'checked':''} onchange="setNotificationTiming('notify5Seconds',this.checked)"></label>
+      <div class="field" style="margin-top:16px">
+        <label style="font-size:15px;font-weight:700">🧠 Reminder timing — because sometimes you remember 5 seconds ago</label>
+        <p class="small muted" style="margin:6px 0 10px">Pick as many reminders as you want. DearSelf will send each selected reminder before the scheduled time.</p>
+        <div class="actions" style="margin:0 0 10px;gap:7px;flex-wrap:wrap">
+          <button type="button" class="btn" onclick="setDearSelfReminderPreset('minimal')">Just before · 5m</button>
+          <button type="button" class="btn" onclick="setDearSelfReminderPreset('standard')">Standard · 1h + 5m</button>
+          <button type="button" class="btn primary" onclick="setDearSelfReminderPreset('memory')">🧠 Memory mode</button>
+          <button type="button" class="btn" onclick="setDearSelfReminderPreset('full')">Everything</button>
         </div>
-        <p class="small muted" style="margin-top:8px">You can select either one or both. If both are enabled, you will get two notifications for each scheduled item.</p>
+        <div class="ds-reminder-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px">
+          ${[
+            ['notify5d','📆 5 days before','Long-term heads-up'],['notify1d','🗓 1 day before','Long-term heads-up'],
+            ['notify5h','🌤 5 hours before','Same-day reminder'],['notify1h','⏰ 1 hour before','Same-day reminder'],
+            ['notify5m','🔔 5 minutes before','Last-minute'],['notify1m','⏱ 1 minute before','Last-minute'],
+            ['notify5s','⚡ 5 seconds before','Right before'],['notify1s','✨ 1 second before','At the start']
+          ].map(([key,label,sub])=>`<label class="ds-reminder-option" style="display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--border);border-radius:14px;background:var(--card);cursor:pointer"><input type="checkbox" ${state.notificationSettings?.[key]===true?'checked':''} onchange="setNotificationTiming('${key}',this.checked)"><span><b>${label}</b><small class="muted" style="display:block;margin-top:2px">${sub}</small></span></label>`).join('')}
+        </div>
+        <div style="margin-top:10px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--accent) 8%,var(--card));border:1px solid color-mix(in srgb,var(--accent) 18%,var(--border))">
+          <b>🧠 Memory mode</b><span class="small muted"> gives you 1 day, 1 hour, 5 minutes, 1 minute and 5 seconds — enough chances to remember.</span>
+        </div>
+        <p class="small muted" style="margin-top:9px">Tip: 1-second and 5-second push notifications depend on the browser, operating system and push service, so delivery can be a little later than the exact second.</p>
       </div>
-      <p class="small muted" style="margin-top:10px">Tap "Enable device notifications" once to turn on background notifications — after that, reminders arrive even when DearSelf is closed.</p>
+      <p class="small muted" style="margin-top:10px">Tap "Enable device notifications" once to turn on background notifications — after that, reminders can arrive even when DearSelf is closed.</p>
     </div><div class="panel" style="margin-top:15px">
       <h2>Data & Account</h2>
 
@@ -1825,12 +1902,12 @@ function deleteEvent(i){deleteAt('events',i,'Calendar')}
 function v(id){return document.getElementById(id)?.value?.trim()||""}
 function logout(){state.locked=true;save();location.reload()}
 function renameHome(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>Rename home page</h2><div class="field"><label>Home page name</label><input id="f_homeName" value="${esc(state.homeName)}" autofocus></div><button class="btn primary" style="margin-top:15px" onclick="saveHomeName()">Save</button>`)}
-function saveHomeName(){let n=v('f_homeName');if(!n)return alert('Please enter a name.');state.homeName=n;save();closeModal();shell();show('Settings');toast('Home page renamed ♡')}
+function saveHomeName(){let n=v('f_homeName');if(!n)return alert('Please enter a name.');state.homeName=n;save();closeModal();shell();openDearSelfSettings();toast('Home page renamed ♡')}
 function changeUsername(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>Change name</h2><div class="field"><label>Name</label><input id="f_user" value="${esc(state.username)}" autofocus></div><button class="btn primary" style="margin-top:15px" onclick="saveUsername()">Save name</button>`)}
-function saveUsername(){let n=v('f_user').trim();if(n.length<3)return alert('Name must be at least 3 characters.');state.username=n;save();closeModal();shell();show('Settings');toast('Name changed')}
+function saveUsername(){let n=v('f_user').trim();if(n.length<3)return alert('Name must be at least 3 characters.');state.username=n;save();closeModal();shell();openDearSelfSettings();toast('Name changed')}
 function changePassword(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>Change password</h2><div class="field"><label>Current password</label><input id="f_pass" type="password" autofocus></div><div class="field" style="margin-top:10px"><label>New password</label><input id="f_new" type="password"></div><div class="field" style="margin-top:10px"><label>Confirm new password</label><input id="f_confirm" type="password"></div><button class="btn primary" style="margin-top:15px" onclick="savePassword()">Save password</button>`)}
 async function savePassword(){if(await hash(v('f_pass'))!==state.passwordHash)return alert('Current password did not match.');let p=v('f_new'),c=v('f_confirm');if(p.length<6)return alert('New password must be at least 6 characters.');if(p!==c)return alert('Passwords do not match.');state.passwordHash=await hash(p);save();closeModal();toast('Password changed')}
-function setPasswordMode(mode){if(!state.passwordHash)return toast('Set a password first.');state.passwordMode=mode;state.locked=false;save();shell();show('Settings');toast(mode==='every'?'Password required every launch':'Remember me enabled')}
+function setPasswordMode(mode){if(!state.passwordHash)return toast('Set a password first.');state.passwordMode=mode;state.locked=false;save();shell();openDearSelfSettings();toast(mode==='every'?'Password required every launch':'Remember me enabled')}
 function advancedSettings(){const bytes=new Blob([JSON.stringify(state)]).size;return `<div class="panel" style="margin-top:15px"><h2>Advanced</h2><p class="small muted">Local storage in use: ${(bytes/1024).toFixed(1)} KB · Account type: ${state.isOwner?"Admin":"Friends/User"}</p><div class="actions"><button class="btn" onclick="viewRawData()">View raw data (JSON)</button><button class="btn" onclick="clearAppCache()">Clear cache & reload</button></div></div>`}
 function viewRawData(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>Raw data</h2><p class="muted">Read-only. Use Export backup if you want a copy you can restore later.</p><textarea readonly style="width:100%;min-height:320px;font-family:ui-monospace,monospace;font-size:12px">${esc(JSON.stringify(state,null,2))}</textarea>`)}
 async function clearAppCache(){if(!confirm('Clear cached app files and reload? Your saved data is not affected.'))return;try{if('caches' in window){const keys=await caches.keys();await Promise.all(keys.map(k=>caches.delete(k)));}if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));}}catch(e){}location.reload()}
@@ -2027,21 +2104,39 @@ window.addEventListener("DOMContentLoaded",()=>{ try{ auth(); }catch(e){ console
     <div class="panel school-connection"><h2>🔗 Your School Flow</h2><div class="school-flow"><span>📚 Course</span><i>→</i><span>📅 Class</span><i>→</i><span>📝 Assignment</span><i>→</i><span>🎓 Exam</span><i>→</i><span>⏱ Study</span><i>→</i><span>📊 Grade</span></div><p class="small muted">DearSelf is designed so the pieces can work together instead of living in separate boxes.</p></div>`}
   function goalsPage(){document.getElementById('content').innerHTML=pageHead('Goals & Habits','Small steps, visible progress, no guilt.')+`<div class="actions"><button class="btn primary" onclick="addGoal()">＋ Goal</button><button class="btn" onclick="addHabit()">＋ Habit</button></div><div class="grid two" style="margin-top:15px"><div class="panel"><div class="row between"><h2>Goals</h2><span class="tag">${(state.goals||[]).length}</span></div><div class="list">${(state.goals||[]).map((g,i)=>`<div class="item"><div class="item-main"><div class="item-title">${_esc(g.title)}</div><div class="bar-track" style="margin-top:9px"><div class="bar-fill" style="width:${Number(g.progress||0)}%"></div></div><div class="item-meta">${Number(g.progress||0)}% complete</div></div><button class="btn" onclick="advanceGoal(${i})">+10%</button><button class="btn danger" onclick="deleteAt('goals',${i},'Goals & Habits')">Delete</button></div>`).join('')||'<div class="empty">No goals yet. Give future-you something to look forward to.</div>'}</div></div><div class="panel"><div class="row between"><h2>Habits</h2><span class="tag">${(state.habits||[]).length}</span></div>${(state.habits||[]).map((h,i)=>`<div class="item"><div class="item-main"><div class="item-title">${_esc(h.title)}</div><div class="item-meta">🔥 ${Number(h.streak||0)} day streak</div></div><button class="btn primary" onclick="checkHabit(${i})">Check in</button><button class="btn danger" onclick="deleteAt('habits',${i},'Goals & Habits')">Delete</button></div>`).join('')||'<div class="empty">Add a tiny habit you want to make easier.</div>'}</div></div><div class="panel" style="margin-top:15px"><h2>✨ A gentle rule</h2><p class="muted">A missed day isn't a failed habit. Start again tomorrow.</p></div>`}
   function settingsPage(){
+    // Single source of truth: notification controls live inside the collapsed Notifications section below.
     const bytes=new Blob([JSON.stringify(state)]).size;
     const widgets=state.dashboardWidgets||{schedule:true,work:true,tasks:true,exams:true,courses:true,goals:true,life:true,quote:true};
-    document.getElementById('content').innerHTML=pageHead('Settings','Make DearSelf feel like your own little digital home.')+`<div class="grid two"><div class="panel"><h2>Profile</h2><div class="row" style="gap:14px;margin-bottom:14px">${profileAvatarMarkup('lg')}<div><b style="font-size:18px">${_esc(state.username||'DearSelf user')}</b><div class="small muted">Your profile photo appears throughout DearSelf.</div></div></div><div class="actions"><button class="btn primary" onclick="profilePhotoPick()">📷 ${state.profilePhoto?'Change photo':'Add profile photo'}</button>${state.profilePhoto?'<button class="btn danger" onclick="removeProfilePhoto()">Remove photo</button>':''}<button class="btn" onclick="renameHome()">Rename home page</button><button class="btn" onclick="changeUsername()">Change name</button><button class="btn" onclick="changePassword()">Change password</button><button class="btn" onclick="setupHomeWidgets()">Customize Home</button><button class="btn" onclick="privacyCenter()">Privacy Center</button><button class="btn" onclick="show('Focus')">Focus Mode</button></div></div><div class="panel"><h2>Privacy</h2><p class="small muted">Everything stays local unless you choose to export or share a backup.</p><div class="actions"><button class="btn ${state.passwordMode==='every'?'primary':''}" onclick="setPasswordMode('every')">Ask every time</button><button class="btn ${state.passwordMode!=='every'?'primary':''}" onclick="setPasswordMode('lock')">Remember me</button></div></div></div>
-      <div class="panel" style="margin-top:15px"><h2>🎨 Personalize</h2><div class="form-grid"><div class="field"><label>Start page</label><select onchange="state.startPage=this.value;save()">${['Home','Search','Calendar','Tasks','Notes','Goals & Habits','Finances','Entertainment','School','Personal','Journal'].map(x=>`<option ${state.startPage===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="field"><label>Text size — ${state.textSize}px</label><input type="range" min="10" max="30" value="${state.textSize}" oninput="state.textSize=Number(this.value);save();cssTheme();this.previousElementSibling.textContent='Text size — '+this.value+'px'"></div></div>
-      <div class="ds-font-gallery">
-        <div class="row between" style="margin-bottom:10px;gap:12px;flex-wrap:wrap">
-          <div><b>🔤 App Font</b><div class="small muted">30 choices — click a font to use it throughout DearSelf.</div></div>
-          <span class="tag" id="dearselfFontCurrent">${esc(state.fontFamily||'Inter')}</span>
-        </div>
-        <div class="ds-font-grid">${DEARSELF_FONT_NAMES.map(f=>`<button type="button" class="ds-font-card ${state.fontFamily===f?'selected':''}" style="font-family:${DEARSELF_FONTS[f]}" onclick="changeDearSelfFont('${f.replace(/'/g,"&#39;")}');settingsPage()"><span class="ds-font-name">${esc(f)}</span><span class="ds-font-preview">DearSelf ♡</span></button>`).join('')}</div>
+    const section=(id,title,desc,buttonText,content,buttonClass='btn')=>`<div class="panel ds-settings-section" style="margin-top:15px"><div class="row between" style="gap:12px;align-items:center;flex-wrap:wrap"><div><h2 style="margin:0">${title}</h2><p class="small muted" style="margin:4px 0 0">${desc}</p></div><button type="button" class="${buttonClass}" id="${id}Toggle" onclick="toggleDearSelfSettingsSection('${id}Config','${id}Toggle','${buttonText}','Hide')">${buttonText}</button></div><div id="${id}Config" style="display:none;margin-top:15px">${content}</div></div>`;
+    const personalizeContent=`
+      <div class="form-grid">
+        <div class="field"><label>Start page</label><select onchange="state.startPage=this.value;save()">${['Home','Search','Calendar','Tasks','Notes','Goals & Habits','Finances','Entertainment','School','Personal','Journal'].map(x=>`<option ${state.startPage===x?'selected':''}>${x}</option>`).join('')}</select></div>
+        <div class="field"><label>Text size — ${state.textSize}px</label><input type="range" min="10" max="30" value="${state.textSize}" oninput="state.textSize=Number(this.value);save();cssTheme();this.previousElementSibling.textContent='Text size — '+this.value+'px'"></div>
       </div>
-      <div style="margin-top:14px"><label class="small muted">Theme</label>${themeGroups()}</div></div>
-      <div class="panel" style="margin-top:15px"><div class="row between"><div><h2>🧭 Interactive Tutorial</h2><p class="small muted">Take the guided DearSelf tour again whenever you want.</p></div><button class="btn primary" onclick="showOnboarding(true)">Start Tutorial</button><button class="btn" onclick="toggleHelpBot(true)">✦ Help Bot</button></div></div>
-      <div class="panel" style="margin-top:15px"><div class="row between"><div><h2>🏠 Home dashboard</h2><p class="small muted">Choose which widgets appear on your Home page.</p></div><button class="btn" onclick="resetDashboardWidgets()">Reset</button></div><div class="ds-widget-settings">${[['schedule','📅 Today’s Schedule'],['work','📝 Upcoming Work'],['tasks','✓ Today’s Focus'],['exams','🎓 Next Exams'],['courses','📚 Course Progress'],['goals','🎯 Goals'],['life','♡ Your Life'],['quote','✦ DearSelf says…']].map(([k,l])=>`<label class="switch-row"><span>${l}</span><input type="checkbox" ${widgets[k]!==false?'checked':''} onchange="toggleDashboardWidget('${k}',this.checked)"></label>`).join('')}</div></div>
+      <div class="panel" style="margin-top:14px;padding:14px;background:var(--card)">
+        <div class="row between" style="gap:10px;flex-wrap:wrap"><div><b>🔤 Fonts</b><div class="small muted">Choose the typeface used throughout DearSelf.</div></div><button type="button" class="btn" onclick="openDearSelfFonts();return false">Show all fonts <span class="muted">· ${esc(state.fontFamily||'Inter')}</span></button></div>
+      </div>
+      <div class="panel" style="margin-top:10px;padding:14px;background:var(--card)">
+        <div class="row between" style="gap:10px;flex-wrap:wrap"><div><b>🎨 Themes</b><div class="small muted">Browse and choose your DearSelf theme.</div></div><button type="button" class="btn" id="dsThemeToggle" onclick="toggleDearSelfSettingsSection('dsThemeConfig','dsThemeToggle','Show all themes','Hide themes')">Show all themes</button></div>
+        <div id="dsThemeConfig" style="display:none;margin-top:12px">${themeGroups()}</div>
+      </div>`;
+    const dashboardContent=`<div class="ds-widget-settings">${[['schedule','📅 Today’s Schedule'],['work','📝 Upcoming Work'],['tasks','✓ Today’s Focus'],['exams','🎓 Next Exams'],['courses','📚 Course Progress'],['goals','🎯 Goals'],['life','♡ Your Life'],['quote','✦ DearSelf says…']].map(([k,l])=>`<label class="switch-row"><span>${l}</span><input type="checkbox" ${widgets[k]!==false?'checked':''} onchange="toggleDashboardWidget('${k}',this.checked)"></label>`).join('')}</div><div class="actions" style="margin-top:12px"><button class="btn" onclick="resetDashboardWidgets()">Reset dashboard</button></div>`;
+    const pictureContent=`<div class="actions"><button class="btn" onclick="show('Home')">View Home</button><button class="btn" onclick="openHomeBannerSettings()">🖼️ Customize banner</button><button class="btn" onclick="openHomeGallerySettings()">📷 Change Gallery picture</button></div>${state.homeBannerImage?'<p class="small muted" style="margin-top:10px">✓ Banner picture set</p>':'<p class="small muted" style="margin-top:10px">No banner picture selected yet.</p>'}${state.homeGalleryImage?'<p class="small muted">✓ Gallery picture set</p>':'<p class="small muted">No Gallery picture selected yet.</p>'}`;
+    const quickContent=`<p class="small muted">If this is empty, Home will guide you back here.</p><div id="dsQuickLinksRows" style="display:grid;gap:8px"></div><div class="actions" style="margin-top:10px"><button class="btn" type="button" onclick="addQuickLinkRow()">＋ Add link</button><button class="btn primary" type="button" onclick="saveQuickLinksSettings()">Save Quick Links</button></div><p class="small muted" style="margin-top:10px">Tip: include <b>https://</b> at the beginning of each link.</p>`;
+    document.getElementById('content').innerHTML=pageHead('Settings','Make DearSelf feel like your own little digital home.')+`
+      <div class="grid two">
+        <div class="panel"><h2>Profile</h2><div class="row" style="gap:14px;margin-bottom:14px">${profileAvatarMarkup('lg')}<div><b style="font-size:18px">${_esc(state.username||'DearSelf user')}</b><div class="small muted">Your profile photo appears throughout DearSelf.</div></div></div><div class="actions"><button class="btn primary" onclick="profilePhotoPick()">📷 ${state.profilePhoto?'Change photo':'Add profile photo'}</button>${state.profilePhoto?'<button class="btn danger" onclick="removeProfilePhoto()">Remove photo</button>':''}<button class="btn" onclick="renameHome()">Rename home page</button><button class="btn" onclick="changeUsername()">Change name</button><button class="btn" onclick="changePassword()">Change password</button></div></div>
+        <div class="panel"><h2>Privacy</h2><p class="small muted">Everything stays local unless you choose to export or share a backup.</p><div class="actions"><button class="btn ${state.passwordMode==='every'?'primary':''}" onclick="setPasswordMode('every')">Ask every time</button><button class="btn ${state.passwordMode!=='every'?'primary':''}" onclick="setPasswordMode('lock')">Remember me</button><button class="btn" onclick="privacyCenter()">Privacy Center</button></div></div>
+      </div>
+      ${section('dsPersonalize','🎨 Personalize','Start page, text size, fonts and themes.','Show personalization options',personalizeContent)}
+      ${section('dsHomePictures','🖼️ Home pictures & banner','Banner and Gallery picture controls.','Show picture options',pictureContent)}
+      ${section('dsQuickLinks','🔗 Quick Links','Links you use often.','Show Quick Links',quickContent)}
+      <div class="panel ds-settings-section" style="margin-top:15px"><div class="row between" style="gap:12px;align-items:center;flex-wrap:wrap"><div><h2 style="margin:0">🔔 Notifications</h2><p class="small muted" style="margin:4px 0 0">Choose what DearSelf reminds you about and when.</p></div><button type="button" class="btn primary" id="dsNotificationsToggle" onclick="toggleDearSelfSettingsSection('dsNotificationConfig','dsNotificationsToggle','Configure notifications','Hide')">Configure notifications</button></div><div id="dsNotificationConfig" style="display:none;margin-top:15px">${window.dearSelfReminderSettingsHtml ? window.dearSelfReminderSettingsHtml().replace(/^<div class="panel ds-notification-settings-panel" id="dsNotificationSettingsPanel" style="margin-top:15px">/,'<div>') : '<p class="muted">Notification settings are unavailable.</p>'}</div></div>
+      ${section('dsDashboard','🏠 Home dashboard','Choose which widgets appear on your Home page.','Configure dashboard',dashboardContent)}
+      <div class="panel" style="margin-top:15px"><div class="row between" style="gap:12px;align-items:center;flex-wrap:wrap"><div><h2 style="margin:0">🧭 Interactive Tutorial</h2><p class="small muted" style="margin:4px 0 0">Take the guided DearSelf tour again whenever you want.</p></div><div class="actions"><button class="btn primary" onclick="showOnboarding(true)">Start Tutorial</button><button class="btn" onclick="toggleHelpBot(true)">✦ Help Bot</button></div></div></div>
       <div class="panel" style="margin-top:15px"><h2>💾 Data</h2><p class="small muted">${(bytes/1024).toFixed(1)} KB currently stored locally.</p><div class="actions"><button class="btn primary" onclick="exportData()">Export backup</button><button class="btn" onclick="importData()">Import backup</button><button class="btn danger" onclick="resetAll()">Reset everything</button></div><div class="small" style="text-align:center;margin-top:12px;padding:10px;border-radius:12px;background:rgba(255,182,193,.14);border:1px solid rgba(255,182,193,.35)"><strong>⚠️ Be careful sharing your data.</strong><br>This was originally meant to share data between devices, so your backup may contain personal information from DearSelf.</div></div>`;
+    // Populate Quick Links only after the collapsed section exists.
+    setTimeout(()=>{if(typeof renderQuickLinksSettings==='function')renderQuickLinksSettings();if(window.updateDearSelfReminderCount)window.updateDearSelfReminderCount();if(window.updateDearSelfReminderPresetButtons)window.updateDearSelfReminderPresetButtons();if(window.renderDearSelfCustomReminders)window.renderDearSelfCustomReminders();},0);
   }
   function toggleDashboardWidget(k,vv){state.dashboardWidgets=state.dashboardWidgets||{};state.dashboardWidgets[k]=vv;save();toast('Home updated ♡')}
   function resetDashboardWidgets(){state.dashboardWidgets={schedule:true,work:true,tasks:true,exams:true,courses:true,goals:true,life:true,quote:true};save();settingsPage()}
@@ -2465,11 +2560,11 @@ window.addEventListener('load',function(){
 </script>
 
 <script>
-/* DearSelf V44.4 Beta GitHub Pages update checker */
+/* DearSelf V45.4 Beta GitHub Pages update checker */
 
 async function checkForUpdates(silent=false){
   try{
-    const r = await fetch('./version.json?ts='+Date.now()+'&build=44.4', {cache:'no-store'});
+    const r = await fetch('./version.json?ts='+Date.now()+'&build=44.8', {cache:'no-store'});
     if(!r.ok) throw new Error('version.json unavailable');
     const v = await r.json();
     const remote = Number(v.versionNumber || 0);
@@ -2585,13 +2680,6 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 
   window.addEventListener('appinstalled', hideInstall);
 
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .catch(err => console.warn('DearSelf service worker:', err));
-    });
-  }
-
   // Show the branded prompt on first/normal visits even if the browser does
   // not expose beforeinstallprompt. This is intentionally not stored as a
   // permanent dismissal.
@@ -2630,7 +2718,7 @@ window.changeDearSelfFont=function(font){
 </script>
 
 <script id="dearself-v44-notifications">
-/* DearSelf V44.4 — local reminder engine with selectable 5m / 5s timing */
+/* DearSelf V45.4 — local reminder engine with selectable 5m / 5s timing */
 (function(){
   function ensure(){
     state.notificationSettings=state.notificationSettings||{};
@@ -2643,28 +2731,133 @@ window.changeDearSelfFont=function(font){
     if(typeof s.todo!=="boolean")s.todo=true;
     if(typeof s.updates!=="boolean")s.updates=true;
     if(!Number.isFinite(Number(s.leadMinutes)))s.leadMinutes=5;
-    if(typeof s.notify5Minutes!=="boolean")s.notify5Minutes=Number(s.leadMinutes)>0;
-    if(typeof s.notify5Seconds!=="boolean")s.notify5Seconds=false;
+    const legacy5m = typeof s.notify5Minutes==='boolean' ? s.notify5Minutes : Number(s.leadMinutes)>0;
+    const legacy5s = typeof s.notify5Seconds==='boolean' ? s.notify5Seconds : false;
+    if(typeof s.notify5d!=='boolean')s.notify5d=false;
+    if(typeof s.notify1d!=='boolean')s.notify1d=false;
+    if(typeof s.notify5h!=='boolean')s.notify5h=false;
+    if(typeof s.notify1h!=='boolean')s.notify1h=false;
+    if(typeof s.notify5m!=='boolean')s.notify5m=legacy5m;
+    if(typeof s.notify1m!=='boolean')s.notify1m=false;
+    if(typeof s.notify5s!=='boolean')s.notify5s=legacy5s;
+    if(typeof s.notify1s!=='boolean')s.notify1s=false;
+    // Keep old keys readable for older builds.
+    s.notify5Minutes=s.notify5m; s.notify5Seconds=s.notify5s;
     state._v44NotificationSent=state._v44NotificationSent||{};
   }
   ensure();
 
+  const DS_NOTIFICATION_OPTIONS = window.DEARSELF_NOTIFICATION_OPTIONS = [
+    {id:'5d',key:'notify5d',ms:5*24*60*60*1000,label:'5 days',group:'Long-term heads-up'},
+    {id:'1d',key:'notify1d',ms:24*60*60*1000,label:'1 day',group:'Long-term heads-up'},
+    {id:'5h',key:'notify5h',ms:5*60*60*1000,label:'5 hours',group:'Same-day reminders'},
+    {id:'1h',key:'notify1h',ms:60*60*1000,label:'1 hour',group:'Same-day reminders'},
+    {id:'5m',key:'notify5m',ms:5*60*1000,label:'5 minutes',group:'Last-minute reminders'},
+    {id:'1m',key:'notify1m',ms:60*1000,label:'1 minute',group:'Last-minute reminders'},
+    {id:'5s',key:'notify5s',ms:5*1000,label:'5 seconds',group:'Right-before reminders'},
+    {id:'1s',key:'notify1s',ms:1000,label:'1 second',group:'Right-before reminders'}
+  ];
+
+  const DS_CUSTOM_UNITS = {
+    seconds: {label:'seconds', short:'sec', ms:1000},
+    minutes: {label:'minutes', short:'min', ms:60*1000},
+    hours:   {label:'hours', short:'hr', ms:60*60*1000},
+    days:    {label:'days', short:'day', ms:24*60*60*1000},
+    weeks:   {label:'weeks', short:'wk', ms:7*24*60*60*1000}
+  };
+
+  function ensureCustomReminders(){
+    ensure();
+    if(!Array.isArray(state.notificationSettings.customReminders)) state.notificationSettings.customReminders=[];
+    state.notificationSettings.customReminders=state.notificationSettings.customReminders.filter(x=>x&&Number(x.amount)>0&&DS_CUSTOM_UNITS[x.unit]).map(x=>({
+      id:String(x.id||('custom_'+Date.now()+'_'+Math.random().toString(36).slice(2,7))),
+      amount:Number(x.amount), unit:x.unit
+    }));
+  }
+  function customReminderOffsets(){
+    ensureCustomReminders();
+    return state.notificationSettings.customReminders.map(x=>({
+      id:'custom-'+x.id, ms:Number(x.amount)*DS_CUSTOM_UNITS[x.unit].ms,
+      label:`${x.amount} ${DS_CUSTOM_UNITS[x.unit].label}`
+    })).filter(x=>Number.isFinite(x.ms)&&x.ms>0);
+  }
   function timingOffsets(){
     ensure();
-    const out=[];
-    if(state.notificationSettings.notify5Minutes!==false)out.push({id:'5m',ms:5*60*1000,label:'5 minutes'});
-    if(state.notificationSettings.notify5Seconds===true)out.push({id:'5s',ms:5*1000,label:'5 seconds'});
-    return out;
+    return DS_NOTIFICATION_OPTIONS.filter(o=>state.notificationSettings[o.key]===true).concat(customReminderOffsets());
   }
+  window.getDearSelfNotificationOffsets=()=>timingOffsets().map(o=>({id:o.id,ms:o.ms,label:o.label}));
+
+  window.toggleDearSelfCustomReminderEditor=function(force){
+    const el=document.getElementById('dsCustomReminderEditor');
+    const btn=document.getElementById('dsCustomReminderToggle');
+    if(!el)return;
+    const open=typeof force==='boolean'?force:(el.style.display==='none'||!el.style.display);
+    el.style.display=open?'block':'none';
+    if(btn)btn.textContent=open?'＋ Add another custom reminder':'＋ Add custom reminder';
+    if(open){const amount=document.getElementById('dsCustomReminderAmount'); if(amount)amount.focus();}
+  };
+
+  window.addDearSelfCustomReminder=function(){
+    ensureCustomReminders();
+    const amountEl=document.getElementById('dsCustomReminderAmount');
+    const unitEl=document.getElementById('dsCustomReminderUnit');
+    const amount=Number(amountEl?.value); const unit=unitEl?.value||'minutes';
+    if(!Number.isFinite(amount)||amount<=0){toast('Enter a reminder amount greater than 0.');return;}
+    if(!DS_CUSTOM_UNITS[unit]){toast('Choose a valid time unit.');return;}
+    if(amount>3650 && unit==='days'){toast('Custom reminders can be up to 3650 days.');return;}
+    state.notificationSettings.customReminders.push({id:'custom_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),amount:Math.round(amount*100)/100,unit});
+    save(); if(window.__dsPushSyncHook)window.__dsPushSyncHook();
+    renderDearSelfCustomReminders(); updateDearSelfReminderCount(); updateDearSelfReminderPresetButtons();
+    if(amountEl){amountEl.value='';amountEl.focus();}
+    toggleDearSelfCustomReminderEditor(true);
+    toast(`Added ${amount} ${DS_CUSTOM_UNITS[unit].label} reminder ♡`);
+  };
+  window.removeDearSelfCustomReminder=function(id){
+    ensureCustomReminders();
+    state.notificationSettings.customReminders=state.notificationSettings.customReminders.filter(x=>String(x.id)!==String(id));
+    save(); if(window.__dsPushSyncHook)window.__dsPushSyncHook();
+    renderDearSelfCustomReminders(); updateDearSelfReminderCount(); updateDearSelfReminderPresetButtons();
+    toast('Custom reminder removed.');
+  };
+  window.renderDearSelfCustomReminders=function(){
+    ensureCustomReminders();
+    const el=document.getElementById('dsCustomReminderList'); if(!el)return;
+    const arr=state.notificationSettings.customReminders;
+    el.innerHTML=arr.length?arr.map(x=>`<div class="ds-custom-reminder-row"><span>⏰ <b>${x.amount} ${DS_CUSTOM_UNITS[x.unit].label}</b> before</span><button type="button" class="btn danger" onclick="removeDearSelfCustomReminder('${String(x.id).replace(/'/g,"\\'")}')">Remove</button></div>`).join(''):`<span class="small muted">No custom reminders yet.</span>`;
+  };
+
+  document.addEventListener('keydown',function(e){
+    const t=e.target;
+    if(t && t.id==='dsCustomReminderAmount' && e.key==='Enter'){
+      e.preventDefault(); addDearSelfCustomReminder();
+    }
+  });
 
   window.setNotificationSetting=function(key,value){
     ensure(); state.notificationSettings[key]=!!value; save(); toast('Notification setting updated');
+    if(window.__dsPushSyncHook)window.__dsPushSyncHook();
   };
   window.setNotificationTiming=function(key,value){
     ensure(); state.notificationSettings[key]=!!value;
-    if(key==='notify5Minutes')state.notificationSettings.leadMinutes=value?5:0;
-    save(); toast('Notification timing updated');
+    if(key==='notify5m')state.notificationSettings.leadMinutes=value?5:0;
+    save(); toast('Reminder timing updated');
     if(window.__dsPushSyncHook)window.__dsPushSyncHook();
+  };
+  window.setDearSelfReminderPreset=function(preset){
+    ensure();
+    const sets={
+      minimal:['notify5m'],
+      standard:['notify1h','notify5m'],
+      memory:['notify1d','notify1h','notify5m','notify1m','notify5s'],
+      full:['notify5d','notify1d','notify5h','notify1h','notify5m','notify1m','notify5s','notify1s']
+    };
+    const chosen=sets[preset]||sets.memory;
+    DS_NOTIFICATION_OPTIONS.forEach(o=>state.notificationSettings[o.key]=chosen.includes(o.key));
+    state.notificationSettings.leadMinutes=state.notificationSettings.notify5m?5:0;
+    save();
+    if(window.__dsPushSyncHook)window.__dsPushSyncHook();
+    settingsPage();
+    toast('Reminder plan updated ♡');
   };
   window.requestDearSelfNotificationPermission=async function(){
     if(!('Notification' in window)){toast('This browser does not support device notifications.');return;}
@@ -2679,17 +2872,32 @@ window.changeDearSelfFont=function(font){
     }catch(e){toast('Could not request notification permission.')}
   };
 
-  function notify(key,title,body,type){
+  async function notify(key,title,body,type){
     ensure();
-    if(state._v44NotificationSent[key])return;
-    state._v44NotificationSent[key]=Date.now();
-    dsAddNotification(title,body,type||'info');
+    const lockKey='dearself-notify-lock:'+String(key);
+    const now=Date.now();
     try{
-      if('Notification' in window && Notification.permission==='granted'){
-        new Notification(title,{body,tag:'dearself-'+key});
+      const existing=localStorage.getItem(lockKey);
+      if(existing && now-Number(existing)<120000)return;
+      localStorage.setItem(lockKey,String(now));
+    }catch(e){
+      if(state._v44NotificationSent[key])return;
+    }
+    if(state._v44NotificationSent[key])return;
+    state._v44NotificationSent[key]=now;
+    dsAddNotification(title,body,type||'info');
+    save();
+
+    /* Only use the local OS popup when Web Push is genuinely unavailable.
+       If a push endpoint/server is configured, never race the background path. */
+    try{
+      if(window.__dsPushStateReady) await window.__dsPushStateReady;
+      const pushConfigured=!!window.__dsWebPushOSNotifications;
+      if(!pushConfigured && !window.__dsWebPushActive &&
+         'Notification' in window && Notification.permission==='granted'){
+        new Notification(title,{body,tag:'dearself-'+key,renotify:false});
       }
     }catch(e){}
-    save();
   }
   function dueMillis(date,time){
     if(!date)return NaN;
@@ -2716,9 +2924,9 @@ window.changeDearSelfFont=function(font){
     if(!Number.isFinite(when))return;
     timingOffsets().forEach(o=>{
       const target=when-o.ms;
-      const tolerance=o.id==='5s'?2500:30000;
+      const tolerance=o.id==='1s'?900:o.id==='5s'?2500:30000;
       if(now>=target && now<=target+tolerance){
-        const t=o.id==='5s'?'Starting now':'Coming up in 5 minutes';
+        const t=(o.id==='5s'||o.id==='1s')?'Starting now':`Coming up in ${o.label}`;
         notify(baseKey+':'+o.id,title.replace(/coming up|due soon/i,t),body,type);
       }
     });
@@ -2776,349 +2984,209 @@ window.changeDearSelfFont=function(font){
   setInterval(run,1000);
   window.addEventListener('load',()=>setTimeout(run,1200));
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)run()});
+  window.updateDearSelfReminderCount=function(){const s=state.notificationSettings||{};const builtins=window.DEARSELF_NOTIFICATION_OPTIONS?window.DEARSELF_NOTIFICATION_OPTIONS.filter(o=>s[o.key]===true).length:0;const custom=Array.isArray(s.customReminders)?s.customReminders.length:0;const count=document.getElementById('dsReminderCount');if(count)count.textContent=(builtins+custom)+' selected'+(custom?' · '+custom+' custom':'');};
 })();
 </script>
 
-<script id="dearself-v44.4-webpush">
+<script id="dearself-v44.5-webpush">
 /* ============================================================
-   DearSelf V44.4 — SAFER CENTRAL WEB PUSH SCHEDULER
-   Replace the existing #dearself-v39-webpush block with this.
-   No DS_API_KEY is used or stored in the frontend.
+   DearSelf V44.7 — central Web Push scheduler
+   Supports every selectable reminder offset.
+   No API secret is stored in the frontend.
    ============================================================ */
 (function(){
+  window.__dsWebPushOSNotifications = false;
+  window.__dsWebPushActive = false;
+  let __resolvePushState;
+  window.__dsPushStateReady = new Promise(resolve=>{__resolvePushState=resolve;});
   const DS_PUSH_SERVER = 'https://YOUR-PUSH-SERVER.example.com';
+  window.__dsWebPushOSNotifications = !!(DS_PUSH_SERVER && !DS_PUSH_SERVER.includes('YOUR-PUSH-SERVER'));
 
   function configured(){
-    return DS_PUSH_SERVER &&
-      !DS_PUSH_SERVER.includes('YOUR-PUSH-SERVER');
+    const ok = !!(DS_PUSH_SERVER && !DS_PUSH_SERVER.includes('YOUR-PUSH-SERVER'));
+    if(ok) window.__dsWebPushOSNotifications = true;
+    return ok;
   }
 
   function urlBase64ToUint8Array(base64String){
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
     const raw = atob(base64);
     return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
   }
 
   async function api(path, body){
     const res = await fetch(DS_PUSH_SERVER + path, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(body)
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
     });
     if(!res.ok) throw new Error(`Push server ${res.status}`);
     return res.json();
   }
 
   async function getSubscription(){
-    if(!('serviceWorker' in navigator) || !('PushManager' in window)){
-      throw new Error('Push is not supported');
-    }
-
+    if(!('serviceWorker' in navigator) || !('PushManager' in window)) throw new Error('Push is not supported');
     const reg = await navigator.serviceWorker.ready;
     let sub = await reg.pushManager.getSubscription();
-
     if(!sub){
       const keyRes = await fetch(DS_PUSH_SERVER + '/api/vapid-public-key');
       if(!keyRes.ok) throw new Error('Could not load VAPID public key');
       const {key} = await keyRes.json();
       if(!key) throw new Error('Missing VAPID public key');
-
-      sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(key)
-      });
+      sub = await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:urlBase64ToUint8Array(key)});
     }
-
     return sub;
   }
 
-  function dueMillis(date, time){
+  function dueMillis(date,time){
     if(!date) return NaN;
-    const d = new Date(String(date) + 'T' + (time || '23:59'));
-    return d.getTime();
+    return new Date(String(date)+'T'+(time||'23:59')).getTime();
   }
 
-  function nextClassOccurrences(x, now, daysAhead=35){
-    const result = [];
-    const days = Array.isArray(x.repeatDays) && x.repeatDays.length
-      ? x.repeatDays
-      : [x.day || 'Monday'];
-
-    const startMin = typeof ttTimeToMinutes === 'function'
-      ? ttTimeToMinutes(x.startTime || x.time)
-      : null;
-
-    if(startMin === null || !Number.isFinite(startMin)) return result;
-
-    const base = new Date(now);
-
-    for(let add=0; add<=daysAhead; add++){
-      const d = new Date(base);
-      d.setDate(base.getDate() + add);
-
-      const name = typeof TT_DAYS !== 'undefined'
-        ? TT_DAYS[(d.getDay()+6)%7]
-        : ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][(d.getDay()+6)%7];
-
-      const matches =
-        days.includes(name) ||
-        (x.repeatMode === 'weekdays' && d.getDay() >= 1 && d.getDay() <= 5);
-
-      if(!matches) continue;
-
-      const fire = new Date(d);
-      fire.setHours(Math.floor(startMin/60), startMin%60, 0, 0);
-
-      if(fire.getTime() > now){
-        result.push(fire.getTime());
-      }
+  function nextClassOccurrences(x,now,daysAhead=35){
+    const result=[];
+    const days=Array.isArray(x.repeatDays)&&x.repeatDays.length?x.repeatDays:[x.day||'Monday'];
+    const startMin=typeof ttTimeToMinutes==='function'?ttTimeToMinutes(x.startTime||x.time):null;
+    if(startMin===null||!Number.isFinite(startMin))return result;
+    const base=new Date(now);
+    for(let add=0;add<=daysAhead;add++){
+      const d=new Date(base); d.setDate(base.getDate()+add);
+      const name=typeof TT_DAYS!=='undefined'?TT_DAYS[(d.getDay()+6)%7]:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][(d.getDay()+6)%7];
+      const matches=days.includes(name)||(x.repeatMode==='weekdays'&&d.getDay()>=1&&d.getDay()<=5);
+      if(!matches)continue;
+      const fire=new Date(d); fire.setHours(Math.floor(startMin/60),startMin%60,0,0);
+      if(fire.getTime()>now)result.push(fire.getTime());
     }
-
     return result;
   }
 
+  function getTimingOffsets(){
+    if(typeof window.getDearSelfNotificationOffsets==='function') return window.getDearSelfNotificationOffsets();
+    const s=state.notificationSettings||{};
+    const all=[
+      ['5d',5*24*60*60*1000,'5 days'],['1d',24*60*60*1000,'1 day'],
+      ['5h',5*60*60*1000,'5 hours'],['1h',60*60*1000,'1 hour'],
+      ['5m',5*60*1000,'5 minutes'],['1m',60*1000,'1 minute'],
+      ['5s',5*1000,'5 seconds'],['1s',1000,'1 second']
+    ];
+    return all.filter(([id])=>s['notify'+id]===true).map(([id,ms,label])=>({id,ms,label}));
+  }
+
   function collectPushReminders(){
-    const s = state.notificationSettings || {};
-    const now = Date.now();
-    const out = [];
-    const offsets=[];
-    if(s.notify5Minutes!==false)offsets.push({id:'5m',ms:5*60*1000});
-    if(s.notify5Seconds===true)offsets.push({id:'5s',ms:5*1000});
+    const s=state.notificationSettings||{};
+    const now=Date.now(),out=[],offsets=getTimingOffsets();
+    if(!offsets.length)return out;
 
-    function add(key, when, title, body, url='/'){
-      if(!Number.isFinite(when)) return;
+    function add(key,when,title,body,url='/'){
+      if(!Number.isFinite(when))return;
       offsets.forEach(o=>{
-        const fireAt = when - o.ms;
-        if(fireAt <= now) return;
-        const timingTitle=o.id==='5s' ? String(title || 'DearSelf').replace(/coming up|due soon/i,'Starting now') : String(title || 'DearSelf');
-        const timingBody=o.id==='5s' ? String(body || '') : String(body || '');
+        const fireAt=when-o.ms;
+        if(fireAt<=now)return;
+        const immediate=o.ms<=5000;
         out.push({
-          key: String(key)+':'+o.id,
-          title: timingTitle,
-          body: timingBody,
+          key:String(key)+':'+o.id,
+          title:immediate?'Starting now':String(title||'DearSelf'),
+          body:immediate?String(body||''):`${String(body||'')} · ${o.label} before`,
           fireAt,
-          url: String(url || '/').startsWith('/') ? String(url) : '/'
+          url:String(url||'/').startsWith('/')?String(url):'/'
         });
       });
     }
 
-    // Study sessions
-    if(s.study){
-      (state.studySessions || []).forEach((x,i)=>{
-        if(x.notifications === false) return;
-        const when = Number(x.startMillis);
-        add(
-          'study:' + (x.id || i) + ':' + when,
-          when,
-          'Study session coming up',
-          `${x.course || 'Study'}${x.topic ? ' — ' + x.topic : ''} starts soon.`,
-          '/'
-        );
-      });
-    }
+    if(s.study)(state.studySessions||[]).forEach((x,i)=>{
+      if(x.notifications===false)return;
+      add('study:'+(x.id||i)+':'+Number(x.startMillis),Number(x.startMillis),'Study session coming up',`${x.course||'Study'}${x.topic?' — '+x.topic:''} starts soon.`);
+    });
 
-    // Assignments
-    if(s.assignments){
-      (state.assignments || []).forEach((a,i)=>{
-        if(a.notifications === false || a.status === 'Completed' || a.status === 'Submitted') return;
-        const when = dueMillis(a.due, a.dueTime || '23:59');
-        add(
-          'assignment:' + (a.id || i),
-          when,
-          'Assignment due soon',
-          `${a.title || 'Assignment'} is due ${new Date(when).toLocaleString()}.`,
-          '/'
-        );
-      });
-    }
+    if(s.assignments)(state.assignments||[]).forEach((a,i)=>{
+      if(a.notifications===false||a.status==='Completed'||a.status==='Submitted')return;
+      const when=dueMillis(a.due,a.dueTime||'23:59');
+      add('assignment:'+(a.id||i),when,'Assignment due soon',`${a.title||'Assignment'} is due ${new Date(when).toLocaleString()}.`);
+    });
 
-    // Exams
-    if(s.exams){
-      (state.exams || []).forEach((e,i)=>{
-        if(e.notifications === false) return;
-        const when = dueMillis(e.date, e.time || '10:00');
-        add(
-          'exam:' + (e.id || i),
-          when,
-          'Exam coming up',
-          `${e.title || 'Exam'}${e.course ? ' · ' + e.course : ''} is scheduled for ${new Date(when).toLocaleString()}.`,
-          '/'
-        );
-      });
-    }
+    if(s.exams)(state.exams||[]).forEach((e,i)=>{
+      if(e.notifications===false)return;
+      const when=dueMillis(e.date,e.time||'10:00');
+      add('exam:'+(e.id||i),when,'Exam coming up',`${e.title||'Exam'}${e.course?' · '+e.course:''} is scheduled for ${new Date(when).toLocaleString()}.`);
+    });
 
-    // Calendar
-    if(s.calendar){
-      (state.events || []).forEach((e,i)=>{
-        if(e.notifications === false) return;
-        const when =
-          e.allDay === false && e.time
-            ? dueMillis(e.date, e.time)
-            : dueMillis(e.date, '09:00');
+    if(s.calendar)(state.events||[]).forEach((e,i)=>{
+      if(e.notifications===false)return;
+      const when=e.allDay===false&&e.time?dueMillis(e.date,e.time):dueMillis(e.date,'09:00');
+      add('event:'+(e.id||i),when,'Event coming up',`${e.title||'Calendar event'} is scheduled for ${new Date(when).toLocaleString()}.`);
+    });
 
-        add(
-          'event:' + (e.id || i),
-          when,
-          'Event coming up',
-          `${e.title || 'Calendar event'} is scheduled for ${new Date(when).toLocaleString()}.`,
-          '/'
-        );
-      });
-    }
+    if(s.todo)[...(state.tasks||[]).map((x,i)=>({x,i,kind:'task'})),...(state.schoolTodos||[]).map((x,i)=>({x,i,kind:'schooltodo'}))].forEach(({x,i,kind})=>{
+      if(x.notifications===false||x.done)return;
+      const when=dueMillis(x.due,x.dueTime||'23:59');
+      add(kind+':'+(x.id||i),when,'To-do due soon',`${x.title||'Task'} is due ${new Date(when).toLocaleString()}.`);
+    });
 
-    // General + School to-do
-    if(s.todo){
-      [
-        ...(state.tasks || []).map((x,i)=>({x,i,kind:'task'})),
-        ...(state.schoolTodos || []).map((x,i)=>({x,i,kind:'schooltodo'}))
-      ].forEach(({x,i,kind})=>{
-        if(x.notifications === false || x.done) return;
+    if(s.timetable)(state.timetable||[]).forEach((x,i)=>{
+      if(x.notifications===false)return;
+      nextClassOccurrences(x,now,35).forEach(when=>add('class:'+(x.id||i)+':'+new Date(when).toISOString(),when,'Class coming up',`${x.course||'Class'} starts at ${new Date(when).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}.`));
+    });
 
-        const when = dueMillis(x.due, x.dueTime || '23:59');
-
-        add(
-          kind + ':' + (x.id || i),
-          when,
-          'To-do due soon',
-          `${x.title || 'Task'} is due ${new Date(when).toLocaleString()}.`,
-          '/'
-        );
-      });
-    }
-
-    // Timetable — queue 35 days of occurrences, not just the next class.
-    if(s.timetable){
-      (state.timetable || []).forEach((x,i)=>{
-        if(x.notifications === false) return;
-
-        nextClassOccurrences(x, now, 35).forEach(when=>{
-          const iso = new Date(when).toISOString();
-
-          add(
-            'class:' + (x.id || i) + ':' + iso,
-            when,
-            'Class coming up',
-            `${x.course || 'Class'} starts at ${new Date(when).toLocaleTimeString([], {
-              hour:'numeric',
-              minute:'2-digit'
-            })}.`,
-            '/'
-          );
-        });
-      });
-    }
-
-    // Keep only future reminders and avoid duplicate keys.
-    const seen = new Set();
-    return out
-      .filter(x => {
-        if(seen.has(x.key)) return false;
-        seen.add(x.key);
-        return x.fireAt > now;
-      })
-      .sort((a,b)=>a.fireAt-b.fireAt)
-      .slice(0,1000);
+    const seen=new Set();
+    return out.filter(x=>{if(seen.has(x.key))return false;seen.add(x.key);return x.fireAt>now;})
+      .sort((a,b)=>a.fireAt-b.fireAt).slice(0,2000);
   }
 
   async function syncPushSchedule(){
-    if(!configured()) return;
-
+    if(!configured())return;
     try{
-      const sub = await getSubscription();
-
-      await api('/api/subscribe', {
-        subscription: sub.toJSON()
-      });
-
-      await api('/api/schedule', {
-        subscription: sub.toJSON(),
-        items: collectPushReminders()
-      });
+      const sub=await getSubscription();
+      const json=sub.toJSON();
+      await api('/api/subscribe',{subscription:json});
+      window.__dsWebPushActive = true;
+      await api('/api/schedule',{subscription:json,items:collectPushReminders()});
     }catch(e){
-      console.warn('DearSelf push sync failed:', e);
+      window.__dsWebPushActive = false;
+      console.warn('DearSelf push sync failed:',e);
     }
   }
 
-  window.subscribeDearSelfPush = async function(){
-    if(!configured()){
-      toast('Background notifications are not configured yet.');
-      return;
-    }
-
-    if(!('Notification' in window)){
-      toast('This browser does not support device notifications.');
-      return;
-    }
-
+  window.__dsRefreshWebPushState=async function(){
     try{
-      const permission =
-        Notification.permission === 'granted'
-          ? 'granted'
-          : await Notification.requestPermission();
-
-      if(permission !== 'granted'){
-        toast(permission === 'denied'
-          ? 'Notifications were blocked by the browser.'
-          : 'Notification permission was not changed.');
-        return;
-      }
-
-      await syncPushSchedule();
-      toast('Background notifications enabled ♡');
-    }catch(e){
-      console.error('DearSelf push subscribe failed:', e);
-      toast('Could not enable background notifications.');
-    }
+      if(!configured() || !('serviceWorker' in navigator) || !('PushManager' in window)) return false;
+      const reg=await navigator.serviceWorker.ready;
+      const sub=await reg.pushManager.getSubscription();
+      window.__dsWebPushActive=!!sub;
+      if(sub) window.__dsWebPushOSNotifications=true;
+      return !!sub;
+    }catch(e){ return false; }
   };
 
-  window.unsubscribeDearSelfPush = async function(){
+  window.subscribeDearSelfPush=async function(){
+    if(!configured()){toast('Background notifications are not configured yet.');return;}
+    if(!('Notification' in window)){toast('This browser does not support device notifications.');return;}
     try{
-      const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.getSubscription();
-
-      if(sub){
-        await fetch(DS_PUSH_SERVER + '/api/unsubscribe', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({endpoint:sub.endpoint})
-        });
-        await sub.unsubscribe();
-      }
-
-      toast('Background notifications disabled.');
-    }catch(e){
-      console.warn('DearSelf push unsubscribe failed:', e);
-    }
+      const permission=Notification.permission==='granted'?'granted':await Notification.requestPermission();
+      if(permission!=='granted'){toast(permission==='denied'?'Notifications were blocked by the browser.':'Notification permission was not changed.');return;}
+      await syncPushSchedule(); toast('Background notifications enabled ♡');
+    }catch(e){console.error('DearSelf push subscribe failed:',e);toast('Could not enable background notifications.');}
   };
 
-  let syncTimer = null;
-
-  window.__dsPushSyncHook = function(){
-    clearTimeout(syncTimer);
-    syncTimer = setTimeout(syncPushSchedule, 1500);
+  window.unsubscribeDearSelfPush=async function(){
+    try{
+      const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
+      if(sub){await fetch(DS_PUSH_SERVER+'/api/unsubscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})});await sub.unsubscribe();}
+      window.__dsWebPushActive=false; window.__dsWebPushOSNotifications=false; toast('Background notifications disabled.');
+    }catch(e){console.warn('DearSelf push unsubscribe failed:',e);}
   };
 
-  window.addEventListener('load', ()=>{
-    setTimeout(()=>{
-      if(typeof Notification !== 'undefined' &&
-         Notification.permission === 'granted'){
-        syncPushSchedule();
-      }
-    }, 1800);
-  });
-
-  document.addEventListener('visibilitychange', ()=>{
-    if(document.visibilityState === 'visible'){
-      clearTimeout(syncTimer);
-      syncTimer = setTimeout(syncPushSchedule, 500);
+  let syncTimer=null;
+  setTimeout(()=>{try{__resolvePushState()}catch(e){}},5000);
+  window.__dsPushSyncHook=function(){clearTimeout(syncTimer);syncTimer=setTimeout(syncPushSchedule,500);};
+  window.addEventListener('load',()=>setTimeout(async()=>{
+    try{
+      await window.__dsRefreshWebPushState();
+      if(typeof Notification!=='undefined'&&Notification.permission==='granted'&&window.__dsWebPushActive)syncPushSchedule();
+    }finally{
+      __resolvePushState();
     }
-  });
-
-  // Expose the collector for debugging/testing without exposing secrets.
-  window.collectDearSelfPushReminders = collectPushReminders;
+  },1200));
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){clearTimeout(syncTimer);syncTimer=setTimeout(syncPushSchedule,500);}});
+  window.collectDearSelfPushReminders=collectPushReminders;
 })();
 </script>
 
@@ -3127,7 +3195,9 @@ window.changeDearSelfFont=function(font){
 (function(){
   try{
     state.fontFamily = DEARSELF_FONTS[state.fontFamily] ? state.fontFamily : 'Inter';
-    state.notificationSettings = Object.assign({study:true,timetable:true,assignments:true,exams:true,todo:true,calendar:true,updates:true,leadMinutes:5,notify5Minutes:true,notify5Seconds:false}, state.notificationSettings||{});
+    state.notificationSettings = Object.assign({study:true,timetable:true,assignments:true,exams:true,todo:true,calendar:true,updates:true,leadMinutes:5,notify5d:false,notify1d:false,notify5h:false,notify1h:false,notify5m:true,notify1m:false,notify5s:false,notify1s:false,customReminders:[]}, state.notificationSettings||{});
+    state.notificationSettings.notify5m = typeof state.notificationSettings.notify5m==='boolean' ? state.notificationSettings.notify5m : state.notificationSettings.notify5Minutes!==false;
+    state.notificationSettings.notify5s = typeof state.notificationSettings.notify5s==='boolean' ? state.notificationSettings.notify5s : state.notificationSettings.notify5Seconds===true;
     save(); cssTheme();
   }catch(e){console.warn('DearSelf V39 migration:',e)}
 })();
@@ -3201,9 +3271,11 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
   const BACKUP_DB='dearself-backup-settings-v1';
   const BACKUP_STORE='settings';
   const BACKUP_KEY='directory';
-  const DEFAULT_AUTO={enabled:false,intervalMinutes:60,deleteAfter7Days:false,lastBackupAt:0,directoryName:''};
+  const DEFAULT_AUTO={enabled:false,intervalMinutes:60,retentionMinutes:0,lastBackupAt:0,directoryName:''};
   state.autoBackup={...DEFAULT_AUTO,...(state.autoBackup||{})};
   state.autoBackup.intervalMinutes=Number(state.autoBackup.intervalMinutes)||60;
+  state.autoBackup.retentionMinutes=Number(state.autoBackup.retentionMinutes)||0;
+  if(state.autoBackup.deleteAfter7Days && !state.autoBackup.retentionMinutes) state.autoBackup.retentionMinutes=7*24*60; // migrate old setting
 
   function backupSettings(){return state.autoBackup||DEFAULT_AUTO}
   function openBackupDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(BACKUP_DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(BACKUP_STORE))r.result.createObjectStore(BACKUP_STORE)};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
@@ -3215,19 +3287,93 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
     const pad=n=>String(n).padStart(2,'0');
     return `DearSelf backup - ${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}.json`;
   }
-  function backupPayload(){return JSON.stringify({app:'DearSelf',version:window.DEARSELF_VERSION||'V44.1 Beta',createdAt:new Date().toISOString(),data:state},null,2)}
+  function cloneBackupState(){
+    // Snapshot the live in-memory app, not a stale settings/template object.
+    try{return structuredClone(state)}catch(e){
+      try{return JSON.parse(JSON.stringify(state))}catch(err){return null}
+    }
+  }
+  function backupPayload(snapshot){
+    const data=snapshot||cloneBackupState()||{};
+    return JSON.stringify({app:'DearSelf',version:window.DEARSELF_VERSION||'V46.1 Beta',createdAt:new Date().toISOString(),source:'live-app-state',data},null,2);
+  }
+  function dataUrlToBytes(dataUrl){
+    try{
+      const m=String(dataUrl||'').match(/^data:([^;,]+)?(;base64)?,(.*)$/s);
+      if(!m)return null;
+      const mime=m[1]||'application/octet-stream';
+      if(m[2]){const raw=atob(m[3]);const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);return {mime,bytes}}
+      return {mime,bytes:new TextEncoder().encode(decodeURIComponent(m[3]))};
+    }catch(e){return null}
+  }
+  function safeBackupName(name,fallback='file'){
+    const clean=String(name||fallback).replace(/[\\/:*?"<>|\x00-\x1F]/g,'_').trim();
+    return (clean||fallback).slice(0,180);
+  }
+  function collectEmbeddedFiles(value,path='DearSelf Files',out=[]){
+    if(!value||typeof value!=='object')return out;
+    if(Array.isArray(value)){value.forEach((v,i)=>collectEmbeddedFiles(v,`${path}/${i}`,out));return out}
+    if(typeof value.data==='string' && value.data.startsWith('data:')){
+      const decoded=dataUrlToBytes(value.data);
+      if(decoded)out.push({name:safeBackupName(value.name||value.filename||'attachment',`attachment-${out.length+1}`),mime:value.type||decoded.mime||'application/octet-stream',bytes:decoded.bytes,path});
+    }
+    Object.entries(value).forEach(([k,v])=>{if(k!=='data')collectEmbeddedFiles(v,`${path}/${k}`,out)});
+    return out;
+  }
+  async function writeEmbeddedFiles(handle,snapshot,stamp){
+    const files=collectEmbeddedFiles(snapshot);
+    if(!files.length)return {count:0,failed:0};
+    let failed=0;
+    try{
+      const root=await handle.getDirectoryHandle(`DearSelf Files - ${stamp}`,{create:true});
+      const used=new Map();
+      for(const f of files){
+        try{
+          let name=f.name, n=(used.get(name)||0)+1; used.set(name,n);
+          if(n>1){const dot=name.lastIndexOf('.');name=dot>0?`${name.slice(0,dot)} (${n})${name.slice(dot)}`:`${name} (${n})`}
+          const fh=await root.getFileHandle(name,{create:true});
+          const w=await fh.createWritable();await w.write(f.bytes);await w.close();
+        }catch(e){failed++;console.warn('DearSelf embedded file backup failed',f.name,e)}
+      }
+    }catch(e){failed=files.length;console.warn('DearSelf embedded file folder could not be created',e)}
+    return {count:files.length-failed,failed};
+  }
   async function ensureDirPermission(handle){if(!handle)return false;try{let p=await handle.queryPermission({mode:'readwrite'});if(p==='granted')return true;if(p==='prompt')p=await handle.requestPermission({mode:'readwrite'});return p==='granted'}catch(e){return false}}
-  async function cleanupOldBackups(handle){if(!backupSettings().deleteAfter7Days)return;const cutoff=Date.now()-7*24*60*60*1000;try{for await(const entry of handle.values()){if(entry.kind!=='file'||!/^DearSelf backup - .*\.json$/i.test(entry.name))continue;let old=false;try{const f=await entry.getFile();old=f.lastModified<cutoff}catch(e){};if(old)try{await handle.removeEntry(entry.name)}catch(e){}}}catch(e){console.warn('DearSelf backup cleanup failed',e)}}
+  async function cleanupOldBackups(handle){
+    const retention=Number(backupSettings().retentionMinutes)||0;
+    if(!retention)return;
+    const cutoff=Date.now()-retention*60*1000;
+    try{
+      for await(const entry of handle.values()){
+        if(entry.kind!=='file'||!/^DearSelf backup - .*\.json$/i.test(entry.name))continue;
+        let old=false;
+        try{const f=await entry.getFile();old=f.lastModified<cutoff}catch(e){}
+        if(old)try{await handle.removeEntry(entry.name)}catch(e){}
+      }
+    }catch(e){console.warn('DearSelf backup cleanup failed',e)}
+  }
   async function writeAutomaticBackup(reason='scheduled'){
     const cfg=backupSettings();if(!cfg.enabled)return false;
     const handle=await getBackupDirectory();
     if(!handle){return false}
     if(!(await ensureDirPermission(handle))){if(typeof toast==='function')toast('Auto backup needs folder permission. Open Backup settings to reconnect it.');return false}
     try{
-      const fileHandle=await handle.getFileHandle(backupFileName(),{create:true});
-      const writable=await fileHandle.createWritable();await writable.write(new Blob([backupPayload()],{type:'application/json'}));await writable.close();
-      cfg.lastBackupAt=Date.now();cfg.directoryName=handle.name||cfg.directoryName||'';save();await cleanupOldBackups(handle);
-      if(reason==='manual'&&typeof toast==='function')toast('Backup saved ♡');
+      const snapshot=cloneBackupState();
+      if(!snapshot)throw new Error('Could not snapshot the live DearSelf state');
+      const now=new Date(), stamp=backupFileName(now).replace(/\.json$/,'');
+      const json=backupPayload(snapshot);
+      // Write the complete live-state JSON first. This is the restore source of truth.
+      const fileHandle=await handle.getFileHandle(backupFileName(now),{create:true});
+      const writable=await fileHandle.createWritable();
+      await writable.write(json);
+      await writable.close();
+      // Also restore uploaded/embedded files as real files instead of leaving them as
+      // data URLs only. The JSON remains complete, so either representation can restore.
+      const assets=await writeEmbeddedFiles(handle,snapshot,stamp);
+      cfg.lastBackupAt=Date.now();cfg.directoryName=handle.name||cfg.directoryName||'';
+      try{save()}catch(e){console.warn('DearSelf backup metadata save failed',e)}
+      await cleanupOldBackups(handle);
+      if(reason==='manual'&&typeof toast==='function')toast(`Backup saved ♡ ${assets.count?`(${assets.count} file${assets.count===1?'':'s'} copied)`:''}`);
       return true;
     }catch(e){console.warn('DearSelf automatic backup failed',e);if(reason==='manual'&&typeof toast==='function')toast('Could not save the backup to that folder.');return false}
   }
@@ -3241,14 +3387,31 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
     // If no folder exists, offer the normal export flow.
     if(typeof exportData==='function')exportData();
   }
-  function backupIntervalLabel(m){return m===5?'Every 5 minutes':m===60?'Every hour':m===1440?'Every 24 hours':'Every '+m+' minutes'}
-  function autoBackupPanel(){const c=backupSettings();return `<div class="panel" style="margin-top:15px"><div class="row between" style="gap:12px;flex-wrap:wrap"><div><h2>💾 Automatic backups</h2><p class="small muted">DearSelf can periodically save a JSON backup into a folder you choose.</p></div><label class="switch-row" style="margin:0"><span>Enable auto backup</span><input type="checkbox" ${c.enabled?'checked':''} onchange="toggleDearSelfAutoBackup(this.checked)"></label></div><div class="ds-additions-grid" style="margin-top:12px"><div class="field"><label>Backup folder</label><div class="ds-backup-status"><strong>${esc(c.directoryName||'No folder connected')}</strong><span class="small muted">Backups are named “DearSelf backup - date time.json”.</span></div><div class="actions" style="margin-top:9px"><button class="btn primary" onclick="chooseDearSelfBackupFolder()">${c.directoryName?'Change folder':'Choose folder'}</button>${c.directoryName?'<button class="btn" onclick="disconnectDearSelfBackupFolder()">Disconnect</button>':''}</div></div><div class="field"><label>How often?</label><select onchange="setDearSelfBackupInterval(Number(this.value))"><option value="5" ${c.intervalMinutes===5?'selected':''}>Every 5 minutes</option><option value="60" ${c.intervalMinutes===60?'selected':''}>Every hour</option><option value="1440" ${c.intervalMinutes===1440?'selected':''}>Every 24 hours</option></select><p class="small muted" style="margin-top:6px">Current: ${backupIntervalLabel(c.intervalMinutes)}</p></div><div class="field"><label>Backup cleanup</label><label class="switch-row"><span>Delete backups older than 7 days</span><input type="checkbox" ${c.deleteAfter7Days?'checked':''} onchange="setDearSelfBackupRetention(this.checked)"></label><p class="small muted">Only files named by DearSelf are eligible for automatic deletion.</p></div></div><div class="actions" style="margin-top:12px"><button class="btn" onclick="manualDearSelfBackupNow()">Create backup now</button><span class="small muted">${c.lastBackupAt?'Last backup: '+new Date(c.lastBackupAt).toLocaleString():'No automatic backup yet.'}</span></div><p class="small muted" style="margin-top:10px">Folder backups require permission from your device/browser. DearSelf will not delete unrelated files.</p></div>`}
+  function formatBackupDuration(minutes){
+    minutes=Number(minutes)||0;
+    if(minutes<60)return `${minutes} minute${minutes===1?'':'s'}`;
+    if(minutes<1440){const h=minutes/60;return `${Number.isInteger(h)?h:h.toFixed(2).replace(/0+$/,'').replace(/\.$/,'')} hour${h===1?'':'s'}`}
+    const d=minutes/1440;return `${Number.isInteger(d)?d:d.toFixed(2).replace(/0+$/,'').replace(/\.$/,'')} day${d===1?'':'s'}`;
+  }
+  function autoBackupPanel(){const c=backupSettings();
+    const customFreq=(Number(c.intervalMinutes)||60);
+    const retention=(Number(c.retentionMinutes)||0);
+    const freqOptions=[5,60,1440];
+    const retOptions=[60,1440,7*1440];
+    return `<div class="panel" style="margin-top:15px"><div class="row between" style="gap:12px;flex-wrap:wrap"><div><h2>💾 Automatic backups</h2><p class="small muted">DearSelf can periodically save a fresh backup into a folder you choose.</p></div><label class="switch-row" style="margin:0"><span>Enable auto backup</span><input type="checkbox" ${c.enabled?'checked':''} onchange="toggleDearSelfAutoBackup(this.checked)"></label></div>
+    <div class="ds-additions-grid" style="margin-top:12px">
+      <div class="field"><label>Backup folder</label><div class="ds-backup-status"><strong>${esc(c.directoryName||'No folder connected')}</strong><span class="small muted">Backups are named “DearSelf backup - date time.json”.</span></div><div class="actions" style="margin-top:9px"><button class="btn primary" onclick="chooseDearSelfBackupFolder()">${c.directoryName?'Change folder':'Choose folder'}</button>${c.directoryName?'<button class="btn" onclick="disconnectDearSelfBackupFolder()">Disconnect</button>':''}</div></div>
+      <div class="field"><label>How often should DearSelf back up?</label><select onchange="setDearSelfBackupInterval(Number(this.value))"><option value="5" ${customFreq===5?'selected':''}>Every 5 minutes</option><option value="60" ${customFreq===60?'selected':''}>Every hour</option><option value="1440" ${customFreq===1440?'selected':''}>Every 24 hours</option><option value="custom" ${!freqOptions.includes(customFreq)?'selected':''}>Custom…</option></select><div class="actions" style="margin-top:8px"><input id="dsBackupFreqAmount" class="input" type="number" min="0.01" step="0.01" placeholder="e.g. 3.5" value="${!freqOptions.includes(customFreq)?(customFreq/60):''}" style="max-width:130px"><select id="dsBackupFreqUnit"><option value="minutes">minutes</option><option value="hours" selected>hours</option><option value="days">days</option></select><button class="btn" onclick="addCustomDearSelfBackupInterval()">Set custom</button></div><p class="small muted">Current: Every ${formatBackupDuration(customFreq)}.</p></div>
+      <div class="field"><label>When should old backups be cleared?</label><select onchange="setDearSelfBackupRetention(Number(this.value))"><option value="0" ${retention===0?'selected':''}>Keep backups</option><option value="60" ${retention===60?'selected':''}>Clear older than 1 hour</option><option value="1440" ${retention===1440?'selected':''}>Clear older than 24 hours</option><option value="10080" ${retention===10080?'selected':''}>Clear older than 7 days</option><option value="custom" ${retention&&!retOptions.includes(retention)?'selected':''}>Custom…</option></select><div class="actions" style="margin-top:8px"><input id="dsBackupRetentionAmount" class="input" type="number" min="0.01" step="0.01" placeholder="e.g. 24" value="${retention&&!retOptions.includes(retention)?(retention/60):''}" style="max-width:130px"><select id="dsBackupRetentionUnit"><option value="minutes">minutes</option><option value="hours" selected>hours</option><option value="days">days</option></select><button class="btn" onclick="setCustomDearSelfBackupRetention()">Set custom</button></div><p class="small muted">${retention?`Currently clearing backups older than ${formatBackupDuration(retention)}.`:'Backups will not be automatically deleted.'}</p></div>
+    </div><div class="actions" style="margin-top:12px"><button class="btn" onclick="manualDearSelfBackupNow()">Create backup now</button><span class="small muted">${c.lastBackupAt?'Last backup: '+new Date(c.lastBackupAt).toLocaleString():'No automatic backup yet.'}</span></div><p class="small muted" style="margin-top:10px">Only DearSelf-created JSON backups are eligible for automatic cleanup. Your unrelated files are left alone.</p></div>`}
   window.chooseDearSelfBackupFolder=chooseBackupFolder;
   window.disconnectDearSelfBackupFolder=disconnectBackupFolder;
   window.manualDearSelfBackupNow=manualBackupNow;
   window.toggleDearSelfAutoBackup=function(on){const c=backupSettings();c.enabled=!!on;save();if(on){if(!c.directoryName)toast('Choose a backup folder first ♡');else writeAutomaticBackup('scheduled');}settingsPage()};
-  window.setDearSelfBackupInterval=function(m){const c=backupSettings();c.intervalMinutes=[5,60,1440].includes(m)?m:60;save();toast('Backup frequency updated ♡');settingsPage()};
-  window.setDearSelfBackupRetention=function(on){backupSettings().deleteAfter7Days=!!on;save();toast(on?'7-day backup cleanup enabled':'7-day backup cleanup disabled');settingsPage()};
+  window.setDearSelfBackupInterval=function(m){const c=backupSettings();if(m==='custom')return;c.intervalMinutes=Math.max(1,Number(m)||60);save();toast(`Backup frequency: every ${formatBackupDuration(c.intervalMinutes)} ♡`);settingsPage()};
+  window.addCustomDearSelfBackupInterval=function(){const amount=Number(document.getElementById('dsBackupFreqAmount')?.value);const unit=document.getElementById('dsBackupFreqUnit')?.value||'hours';if(!Number.isFinite(amount)||amount<=0){toast('Enter a valid backup interval.');return}const mult={minutes:1,hours:60,days:1440}[unit]||60;const mins=amount*mult;if(mins<1){toast('Backup interval must be at least 1 minute.');return}backupSettings().intervalMinutes=mins;save();toast(`Custom backup interval set: every ${formatBackupDuration(mins)} ♡`);settingsPage()};
+  window.setDearSelfBackupRetention=function(m){const c=backupSettings();c.retentionMinutes=Math.max(0,Number(m)||0);save();toast(c.retentionMinutes?`Cleanup set: clear backups older than ${formatBackupDuration(c.retentionMinutes)} ♡`:'Backup cleanup disabled ♡');settingsPage()};
+  window.setCustomDearSelfBackupRetention=function(){const amount=Number(document.getElementById('dsBackupRetentionAmount')?.value);const unit=document.getElementById('dsBackupRetentionUnit')?.value||'hours';if(!Number.isFinite(amount)||amount<=0){toast('Enter a valid cleanup age.');return}const mult={minutes:1,hours:60,days:1440}[unit]||60;const mins=amount*mult;if(mins<1){toast('Cleanup age must be at least 1 minute.');return}backupSettings().retentionMinutes=mins;save();toast(`Custom cleanup set: ${formatBackupDuration(mins)} ♡`);settingsPage()};
   window.__dearSelfAutoBackupTick=async function(){const c=backupSettings();if(!c.enabled||!c.directoryName)return;if(!c.lastBackupAt||Date.now()-c.lastBackupAt>=c.intervalMinutes*60000)await writeAutomaticBackup('scheduled')};
   setInterval(()=>window.__dearSelfAutoBackupTick?.(),60000);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')window.__dearSelfAutoBackupTick?.()});
@@ -3331,22 +3494,141 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
 
   // Settings wrapper: inject the new backup panel once.
   const oldSettings=window.settingsPage;
-  window.settingsPage=function(){if(typeof oldSettings==='function')oldSettings();const c=document.getElementById('content');if(!c||c.querySelector('#dearselfAutoBackupPanel'))return;const panel=document.createElement('div');panel.id='dearselfAutoBackupPanel';panel.innerHTML=autoBackupPanel();c.appendChild(panel)};
+  function isDearSelfReminderPresetActive(preset,s){
+    const sets={
+      minimal:['notify5m'],
+      standard:['notify1h','notify5m'],
+      memory:['notify1d','notify1h','notify5m','notify1m','notify5s'],
+      full:['notify5d','notify1d','notify5h','notify1h','notify5m','notify1m','notify5s','notify1s']
+    };
+    const chosen=sets[preset]||[];
+    if(Array.isArray(s.customReminders) && s.customReminders.length) return false;
+    return chosen.length>0 && window.DEARSELF_NOTIFICATION_OPTIONS.every(o=>Boolean(s[o.key])===chosen.includes(o.key));
+  }
+  window.clearDearSelfReminderTimings=function(){
+    state.notificationSettings=state.notificationSettings||{};
+    window.DEARSELF_NOTIFICATION_OPTIONS.forEach(o=>state.notificationSettings[o.key]=false);
+    state.notificationSettings.leadMinutes=0;
+    state.notificationSettings.notify5Minutes=false;
+    state.notificationSettings.notify5Seconds=false;
+    state.notificationSettings.customReminders=[];
+    save();
+    if(window.__dsPushSyncHook)window.__dsPushSyncHook();
+    (window.settingsPage||settingsPage)();
+    toast('Reminder timings cleared');
+  };
+
+  window.dearSelfReminderSettingsHtml=function(){
+    const s=state.notificationSettings||{};
+    const options=[
+      ['notify5d','📆 5 days before','Long-term heads-up'],
+      ['notify1d','🗓 1 day before','Long-term heads-up'],
+      ['notify5h','🌤 5 hours before','Same-day reminder'],
+      ['notify1h','⏰ 1 hour before','Same-day reminder'],
+      ['notify5m','🔔 5 minutes before','Last-minute reminder'],
+      ['notify1m','⏱ 1 minute before','Last-minute reminder'],
+      ['notify5s','⚡ 5 seconds before','Right before it starts'],
+      ['notify1s','✨ 1 second before','At the start']
+    ];
+    const count=options.filter(o=>s[o[0]]===true).length + (Array.isArray(s.customReminders)?s.customReminders.length:0);
+    const types=[
+      ['study','⏱ Study sessions'],['timetable','📅 Timetable classes'],['assignments','📝 Assignments'],
+      ['exams','🎓 Exams'],['calendar','🗓 Calendar events'],['todo','✓ To-do / tasks'],['updates','↻ DearSelf updates']
+    ];
+    return `<div class="panel ds-notification-settings-panel" id="dsNotificationSettingsPanel" style="margin-top:15px">
+      <div class="row between" style="gap:14px;align-items:flex-start;flex-wrap:wrap">
+        <div><h2 style="margin:0 0 4px">🔔 Notifications & Reminders</h2><p class="small muted" style="margin:0">Because future-you deserves a heads-up. Pick what DearSelf should remind you about and how early.</p></div>
+        <button class="btn primary" type="button" onclick="requestDearSelfNotificationPermission()">🔔 Enable device notifications</button>
+      </div>
+      <div style="margin-top:16px">
+        <b>What should I be reminded about?</b>
+        <div class="ds-widget-settings" style="margin-top:9px">${types.map(([k,l])=>`<label class="switch-row"><span>${l}</span><input type="checkbox" ${s[k]!==false?'checked':''} onchange="setNotificationSetting('${k}',this.checked)"></label>`).join('')}</div>
+      </div>
+      <div style="margin-top:18px;padding-top:17px;border-top:1px solid var(--border)">
+        <div class="row between" style="gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h3 style="margin:0 0 4px">🧠 Reminder timing</h3><p class="small muted" style="margin:0">Select one, several, or all. Multiple selections give you multiple chances to remember.</p></div><span class="tag" id="dsReminderCount">${count} selected</span></div>
+        <div class="actions" style="margin:13px 0 11px;gap:7px;flex-wrap:wrap">
+          <button type="button" id="dsReminderPresetMinimal" class="btn ${isDearSelfReminderPresetActive('minimal',s)?'primary':''}" onclick="setDearSelfReminderPreset('minimal')">Just before · 5m</button>
+          <button type="button" id="dsReminderPresetStandard" class="btn ${isDearSelfReminderPresetActive('standard',s)?'primary':''}" onclick="setDearSelfReminderPreset('standard')">Standard · 1h + 5m</button>
+          <button type="button" id="dsReminderPresetMemory" class="btn ${isDearSelfReminderPresetActive('memory',s)?'primary':''}" onclick="setDearSelfReminderPreset('memory')">🧠 Memory mode</button>
+          <button type="button" id="dsReminderPresetFull" class="btn ${isDearSelfReminderPresetActive('full',s)?'primary':''}" onclick="setDearSelfReminderPreset('full')">Everything</button>
+          <button type="button" class="btn ghost" onclick="clearDearSelfReminderTimings()">Clear</button>
+        </div>
+        <div id="dsReminderTimingGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:9px">${options.map(([key,label,sub])=>{const on=s[key]===true;return `<label class="ds-reminder-option" style="display:flex;align-items:center;gap:11px;padding:13px;border:1px solid ${on?'var(--accent)':'var(--border)'};border-radius:15px;background:var(--card);cursor:pointer"><input type="checkbox" ${on?'checked':''} onchange="setNotificationTiming('${key}',this.checked);this.closest('.ds-reminder-option').style.borderColor=this.checked?'var(--accent)':'var(--border)';updateDearSelfReminderCount();updateDearSelfReminderPresetButtons()"><span><b>${label}</b><small class="muted" style="display:block;margin-top:3px">${sub}</small></span></label>`}).join('')}</div>
+        <div style="margin-top:14px;padding:14px;border:1px solid var(--border);border-radius:16px;background:var(--card)">
+          <div class="row between" style="gap:10px;align-items:center;flex-wrap:wrap">
+            <div><b>➕ Custom reminders</b><div class="small muted">Make your own timing. Decimals are allowed, and you can add as many as you want.</div></div>
+            <button type="button" class="btn" id="dsCustomReminderToggle" onclick="toggleDearSelfCustomReminderEditor()">＋ Add custom reminder</button>
+          </div>
+          <div id="dsCustomReminderEditor" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+            <div class="small muted" style="margin-bottom:8px">Examples: <b>10 days</b> · <b>3.5 hours</b> · <b>8 minutes</b> · <b>10 seconds</b></div>
+            <div class="actions" style="gap:8px;flex-wrap:wrap;align-items:center">
+              <input id="dsCustomReminderAmount" type="number" min="0.1" step="0.1" inputmode="decimal" placeholder="Amount" aria-label="Custom reminder amount" style="width:130px">
+              <select id="dsCustomReminderUnit" aria-label="Custom reminder unit" style="width:140px">
+                <option value="seconds">seconds</option><option value="minutes" selected>minutes</option><option value="hours">hours</option><option value="days">days</option><option value="weeks">weeks</option>
+              </select>
+              <button type="button" class="btn primary" onclick="addDearSelfCustomReminder()">＋ Add</button>
+              <button type="button" class="btn ghost" onclick="toggleDearSelfCustomReminderEditor(false)">Done</button>
+            </div>
+          </div>
+          <div id="dsCustomReminderList" style="display:grid;gap:7px;margin-top:10px"></div>
+        </div>
+        <div style="margin-top:12px;padding:12px 14px;border-radius:15px;background:color-mix(in srgb,var(--accent) 8%,var(--card));border:1px solid color-mix(in srgb,var(--accent) 18%,var(--border))"><b>🧠 Memory mode</b><span class="small muted"> 1 day + 1 hour + 5 minutes + 1 minute + 5 seconds — for those “WAIT, what was I supposed to do?” moments.</span></div>
+        <p class="small muted" style="margin:10px 0 0">Very short push reminders (1s/5s) can be delayed by the browser, operating system, or push service. Longer reminders are more reliable.</p>
+      </div>
+    </div>`;
+  }
+  window.updateDearSelfReminderPresetButtons=function(){
+    const s=state.notificationSettings||{};
+    const map={minimal:'dsReminderPresetMinimal',standard:'dsReminderPresetStandard',memory:'dsReminderPresetMemory',full:'dsReminderPresetFull'};
+    Object.entries(map).forEach(([preset,id])=>{
+      const b=document.getElementById(id);
+      if(b)b.classList.toggle('primary',isDearSelfReminderPresetActive(preset,s));
+    });
+  };
+
+  window.toggleDearSelfSettingsSection=function(id,buttonId,showText,hideText){
+    const el=document.getElementById(id),btn=document.getElementById(buttonId);
+    if(!el)return; const open=el.style.display==='none'||!el.style.display;
+    el.style.display=open?'block':'none'; if(btn)btn.textContent=open?hideText:showText;
+    if(open && id==='dsNotificationConfig'){
+      renderDearSelfCustomReminders(); updateDearSelfReminderCount(); updateDearSelfReminderPresetButtons();
+      const ce=document.getElementById('dsCustomReminderEditor'); if(ce)ce.style.display='none';
+      const cb=document.getElementById('dsCustomReminderToggle'); if(cb)cb.textContent='＋ Add custom reminder';
+    }
+  };
+  window.updateDearSelfReminderCount=function(){
+    const s=state.notificationSettings||{};
+    const builtins=window.DEARSELF_NOTIFICATION_OPTIONS?window.DEARSELF_NOTIFICATION_OPTIONS.filter(o=>s[o.key]===true).length:0;
+    const custom=Array.isArray(s.customReminders)?s.customReminders.length:0;
+    const el=document.getElementById('dsReminderCount'); if(el)el.textContent=(builtins+custom)+' selected';
+  };
+    window.settingsPage=function(){
+    if(typeof oldSettings==='function')oldSettings();
+    const c=document.getElementById('content');
+    if(!c)return;
+    if(!c.querySelector('#dearselfAutoBackupPanel')){
+      const panel=document.createElement('div');panel.id='dearselfAutoBackupPanel';panel.innerHTML=autoBackupPanel();c.appendChild(panel);
+    }
+    setTimeout(()=>{
+      if(window.updateDearSelfReminderCount)window.updateDearSelfReminderCount();
+      if(window.updateDearSelfReminderPresetButtons)window.updateDearSelfReminderPresetButtons();
+      if(window.renderDearSelfCustomReminders)window.renderDearSelfCustomReminders();
+    },0);
+  };
 })();
 </script>
-</body>
-</html>
+
 
 
 <script>window.removeHomeBannerImage=removeHomeBannerImage;window.openHomeBannerSettings=openHomeBannerSettings;window.pickHomeImage=pickHomeImage;</script>
 
 <script>
-/* DearSelf V44.4 — authoritative update checker.
+/* DearSelf V45.4 — authoritative update checker.
    The app compares normalized numeric versions and never treats its own
    current version as an available update. */
 (function(){
-  const DS_VERSION = "V44.4 Beta";
-  const DS_VERSION_NUMBER = 44.4;
+  const DS_VERSION = "V46.2 Beta";
+  const DS_VERSION_NUMBER = 46.2;
   window.DEARSELF_VERSION = DS_VERSION;
   window.DEARSELF_VERSION_NUMBER = DS_VERSION_NUMBER;
 
@@ -3357,7 +3639,7 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
 
   window.checkForDearSelfUpdate = async function(){
     try{
-      const url = "version.json?ds_version_check=" + Date.now() + "&build=44.4";
+      const url = "version.json?ds_version_check=" + Date.now() + "&build=45.2";
       const res = await fetch(url, {
         cache: "no-store",
         headers: {"Cache-Control":"no-cache"}
@@ -3406,8 +3688,8 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
    the browser and can be annotated/opened externally. Unsupported formats
    fall back safely to the OS-compatible application. */
 (function(){
-  const DS_V44 = "V44.4 Beta";
-  const DS_N44 = 44.4;
+  const DS_V44 = "V45.4 Beta";
+  const DS_N44 = 45.2;
   window.DEARSELF_VERSION = DS_V44;
   window.DEARSELF_VERSION_NUMBER = DS_N44;
 
@@ -3709,3 +3991,5 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
   document.head.appendChild(style);
 })();
 </script>
+</body>
+</html>

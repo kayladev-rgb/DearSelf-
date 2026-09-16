@@ -1,14 +1,8 @@
 {
-  "name": "dearself-push-server",
-  "version": "1.1.0",
+  "name": "dearself-local-sync-bridge",
   "private": true,
-  "description": "Web Push notification server for DearSelf",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
+  "version": "44.0.0-beta",
   "dependencies": {
-    "express": "^4.19.2",
-    "web-push": "^3.6.7"
+    "ws": "^8.18.0"
   }
 }

@@ -1,9 +1,4 @@
 {
-  "version": "V44.2 Beta",
-  "versionNumber": 44.2,
-  "notes": [
-    "Expanded scheduling reminders across DearSelf.",
-    "Added browser notifications for exams and calendar events.",
-    "Added per-item notification controls and timing support for scheduled items."
-  ]
+  "version": "V46.2 Beta",
+  "versionNumber": 46.2
 }
