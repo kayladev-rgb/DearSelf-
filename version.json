@@ -1,0 +1,11 @@
+{
+  "version": "V45.1 Beta",
+  "versionNumber": 45.1,
+  "notes": [
+    "Fixed the V45 notification startup issue.",
+    "Notification engine is now fully deferred and cannot block DearSelf startup.",
+    "Central reminders cover assignments, exams, calendar events, tasks, school to-dos, study sessions, timetable classes and recurring scheduled items.",
+    "Device notification permission and foreground notification sounds are integrated.",
+    "Scheduling forms expose notification controls where applicable."
+  ]
+}

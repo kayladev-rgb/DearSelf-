@@ -1,0 +1,8 @@
+{
+  "name": "dearself-local-sync-bridge",
+  "private": true,
+  "version": "45.1.0-beta",
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
