@@ -1,4 +1,4 @@
-const CACHE = 'dearself-v45-1-beta';
+const CACHE = 'dearself-v44-2-beta';
 const CORE = ['./', './index.html', './version.json', './manifest.json'];
 
 self.addEventListener('install', event => {
@@ -46,5 +46,3 @@ self.addEventListener('fetch', event => {
       .catch(() => caches.match(event.request))
   );
 });
-
-self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(cs=>{const c=cs[0];return c?c.focus():clients.openWindow(new URL('./index.html',self.registration.scope).href)}).catch(()=>{}));});

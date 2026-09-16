@@ -1,11 +1,9 @@
 {
-  "version": "V45.1 Beta",
-  "versionNumber": 45.1,
+  "version": "V44.2 Beta",
+  "versionNumber": 44.2,
   "notes": [
-    "Fixed the V45 notification startup issue.",
-    "Notification engine is now fully deferred and cannot block DearSelf startup.",
-    "Central reminders cover assignments, exams, calendar events, tasks, school to-dos, study sessions, timetable classes and recurring scheduled items.",
-    "Device notification permission and foreground notification sounds are integrated.",
-    "Scheduling forms expose notification controls where applicable."
+    "Expanded scheduling reminders across DearSelf.",
+    "Added browser notifications for exams and calendar events.",
+    "Added per-item notification controls and timing support for scheduled items."
   ]
 }

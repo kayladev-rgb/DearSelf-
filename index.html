@@ -306,8 +306,8 @@ body{font-family:var(--dearself-selected-font)!important}
 <div id="toast" class="toast"></div><div id="dsHelpBot" class="ds-helpbot" aria-label="DearSelf Help Bot"><div class="ds-hb-head"><div class="ds-hb-avatar">✦</div><div style="min-width:0"><h3>DearSelf Help Bot</h3><div class="small muted">Your in-app helper · can do things for you</div></div><button class="ds-hb-conv-toggle" id="dsHelpConvToggle" type="button" title="Conversations" aria-label="Open conversations">☰</button><span class="ds-hb-badge">BETA</span><button class="ds-hb-close" onclick="toggleHelpBot(false)">×</button></div><div class="ds-hb-layout"><aside id="dsHelpHistory" class="ds-hb-history"><div class="ds-hb-history-top"><button class="ds-hb-new" id="dsHelpNewConversation" type="button">＋ New conversation</button><div id="dsHelpHistoryCount" class="ds-hb-history-count"></div></div><div id="dsHelpConvs" class="ds-hb-convs"></div></aside><div class="ds-hb-chatcol"><div id="dsHelpMsgs" class="ds-hb-msgs"></div><div class="ds-hb-input"><textarea id="dsHelpInput" placeholder="Tell me what you want to do…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendHelpBot()}"></textarea><button class="ds-hb-send" onclick="sendHelpBot()">Send</button></div></div></div></div><button id="dsHelpFab" class="ds-helpbot-fab" onclick="toggleHelpBot()" title="DearSelf Help Bot">✦</button>
 <script>
 
-const DEARSELF_VERSION = "V45.1 Beta";
-const DEARSELF_VERSION_NUMBER = 45.1;
+const DEARSELF_VERSION = "V44.2 Beta";
+const DEARSELF_VERSION_NUMBER = 44.2;
 window.DEARSELF_VERSION = DEARSELF_VERSION;
 window.DEARSELF_VERSION_NUMBER = DEARSELF_VERSION_NUMBER;
 
@@ -320,7 +320,7 @@ const DEFAULT={
  courses:[],assignments:[],exams:[],grades:[],study:[],studySessions:[],schoolTodos:[],courseNotes:[],
  journalEntries:[],journalStickers:[],
  timetable:[],activity:[],monthlyBudget:0,
- externalAccounts:[], notifications:[], notificationSettings:{study:true,timetable:true,assignments:true,todo:true,leadMinutes:15}, focusSessions:[], habits:[], analyticsPrefs:{}, homeWidgets:{}, privacySettings:{autoLock:false}, universalFiles:[],homeBannerImage:"",homeBannerText:"A calm mind creates a beautiful life. ♡",homeGalleryImage:"",homeQuickLinks:[]
+ externalAccounts:[], notifications:[], notificationSettings:{study:true,timetable:true,assignments:true,exams:true,todo:true,calendar:true,updates:true,leadMinutes:15}, focusSessions:[], habits:[], analyticsPrefs:{}, homeWidgets:{}, privacySettings:{autoLock:false}, universalFiles:[],homeBannerImage:"",homeBannerText:"A calm mind creates a beautiful life. ♡",homeGalleryImage:"",homeQuickLinks:[]
 };
 let state=load(), currentPage="Home", calCursor=new Date(); calCursor.setDate(1); let calView="month";
 let stickerCursor=new Date(), stickerView='week';
@@ -579,7 +579,7 @@ function initHomeDrag(){const grid=document.getElementById('dsHomeGrid');if(!gri
 function saveHomeOrder(){const grid=document.getElementById('dsHomeGrid');if(!grid)return;state.homeWidgetOrder=[...grid.querySelectorAll('.ds-widget-card')].map(x=>x.dataset.widget);save();toast('Home layout saved ♡')}
 function quickAdd(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>＋ Quick add</h2><p class="muted">Choose what you want to create.</p><div class="actions">${["Task","Calendar event","Note","Goal","Expense","Income","Entertainment item","Course","Assignment","Exam","Study session"].map(x=>`<button class="btn" onclick="closeModal();${({"Task":"addTask","Calendar event":"addEvent","Note":"addNote","Goal":"addGoal","Expense":"addExpense","Income":"addIncome","Entertainment item":"addEntItem","Course":"addCourse","Assignment":"addAssignment","Exam":"addExam","Study session":"addStudy"}[x])}()">${x}</button>`).join("")}</div>`)}
 function tasksPage(){document.getElementById("content").innerHTML=pageHead("Tasks","Simple when you need it. Advanced controls are available in Settings.")+`<div class="actions"><button class="btn primary" onclick="addTask()">＋ Add task</button><button class="btn" onclick="clearDone()">Clear all completed</button></div><div class="panel" style="margin-top:15px"><div class="list">${state.tasks.map((x,i)=>`<div class="item"><input type="checkbox" ${x.done?"checked":""} onchange="toggleTask(${i})"><div class="item-main"><div class="item-title" style="${x.done?"text-decoration:line-through;color:var(--muted)":""}">${esc(x.title)}</div><div class="item-meta">${x.due?"Due "+esc(x.due):"No deadline"} ${x.priority?" · "+esc(x.priority):""}</div></div><button class="btn ghost" onclick="deleteAt('tasks',${i},'Tasks')">×</button></div>`).join("")||`<div class="empty"><strong>No tasks yet</strong>Build your to-do list here.</div>`}</div></div>`}
-function addTask(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>New task</h2><div class="form-grid"><div class="field full"><label>Task</label><input id="f_title"></div><div class="field"><label>Due date</label><input id="f_due" type="date"></div><div class="field"><label>Priority</label><select id="f_priority"><option>Normal</option><option>High</option><option>Low</option></select></div></div><div class="actions" style="margin-top:18px"><button class="btn primary" onclick="let x=v('f_title');if(!x)return;state.tasks.push({title:x,due:v('f_due'),priority:v('f_priority'),done:false});addActivity('Added task: '+x);closeModal();show('Tasks')">Save task</button></div>`)}
+function addTask(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>New task</h2><div class="form-grid"><div class="field full"><label>Task</label><input id="f_title"></div><div class="field"><label>Due date</label><input id="f_due" type="date"></div><div class="field"><label>Due time</label><input id="f_dueTime" type="time" value="23:59"></div><div class="field"><label>Priority</label><select id="f_priority"><option>Normal</option><option>High</option><option>Low</option></select></div></div><div class="actions" style="margin-top:18px"><button class="btn primary" onclick="let x=v('f_title');if(!x)return;state.tasks.push({title:x,due:v('f_due'),priority:v('f_priority'),done:false});addActivity('Added task: '+x);closeModal();show('Tasks')">Save task</button></div>`)}
 function toggleTask(i){state.tasks[i].done=!state.tasks[i].done;save();show(currentPage)}
 function clearDone(){state.tasks=state.tasks.filter(x=>!x.done);save();show("Tasks")}
 function notesPage(){document.getElementById("content").innerHTML=pageHead("Notes","Capture ideas, plans, class notes and anything else.")+`<button class="btn primary" onclick="addNote()">＋ New note</button><div class="grid two" style="margin-top:15px">${state.notes.map((n,i)=>`<div class="panel"><div class="row between"><h2>${esc(n.title)}</h2><button class="btn ghost" onclick="deleteAt('notes',${i},'Notes')">×</button></div><p class="muted">${esc(n.body)}</p><div class="small muted">${esc(n.date||"")}</div></div>`).join("")||`<div class="empty"><strong>No notes yet</strong>Create your first note.</div>`}</div>`}
@@ -689,7 +689,8 @@ function addEvent(date=today(),editIndex=-1){
     <div class="field"><label>End time</label><input id="f_endTime" type="time" value="${esc(x.endTime||"")}"></div>
     <div class="field full"><label>Location / link</label><input id="f_location" value="${esc(x.location||"")}"></div>
     <div class="field full"><label>Notes / description</label><textarea id="f_notes">${esc(x.notes||"")}</textarea></div>
-    <div class="field full"><label class="row" style="gap:8px;text-transform:none"><input id="f_notify" type="checkbox" checked> 🔔 Notify me</label></div><div class="field"><label>Reminder</label><select id="f_notifyLead"><option value="5">5 minutes before</option><option value="15" selected>15 minutes before</option><option value="30">30 minutes before</option><option value="60">1 hour before</option><option value="1440">1 day before</option></select></div><div class="field full"><label class="row" style="gap:8px;text-transform:none"><input id="f_allDay" type="checkbox" ${x.allDay!==false?"checked":""}> All-day event</label></div>
+    <div class="field full"><label class="row" style="gap:8px;text-transform:none"><input id="f_allDay" type="checkbox" ${x.allDay!==false?"checked":""}> All-day event</label></div>
+    <div class="field full"><label class="row" style="gap:8px;text-transform:none;font-size:13px"><input id="f_notify" type="checkbox" ${x.notifications!==false?"checked":""}> Notify me before this event</label></div>
   </div>
   <div class="actions" style="margin-top:15px">
     <button class="btn primary" onclick="saveEvent(${editIndex})">${editIndex>=0?"Save changes":"Save event"}</button>
@@ -698,7 +699,7 @@ function addEvent(date=today(),editIndex=-1){
 }
 function saveEvent(i=-1){
   let t=v("f_title"); if(!t)return alert("Please enter an event title.");
-  let obj={id:i>=0?(state.events[i].id||("evt_"+Date.now())):("evt_"+Date.now()+"_"+Math.random().toString(36).slice(2,7)),title:t,date:v("f_date")||today(),calendar:v("f_cal"),time:v("f_time"),endTime:v("f_endTime"),location:v("f_location"),notes:v("f_notes"),allDay:document.getElementById("f_allDay")?.checked!==false,notifications:document.getElementById("f_notify")?.checked!==false,notificationLeadMinutes:Number(v("f_notifyLead"))||15};
+  let obj={id:i>=0?(state.events[i].id||("evt_"+Date.now())):("evt_"+Date.now()+"_"+Math.random().toString(36).slice(2,7)),title:t,date:v("f_date")||today(),calendar:v("f_cal"),time:v("f_time"),endTime:v("f_endTime"),location:v("f_location"),notes:v("f_notes"),allDay:document.getElementById("f_allDay")?.checked!==false,notifications:document.getElementById("f_notify")?.checked!==false};
   if(i>=0)state.events[i]={...state.events[i],...obj}; else state.events.push(obj);
   save();addActivity((i>=0?"Updated":"Added")+" event: "+t);closeModal();calendarPage();toast(i>=0?"Event updated":"Event added");
 }
@@ -812,7 +813,7 @@ function saveAssignmentEdit(i){
 }
 function examCountdown(e){let ms=new Date((e.date||'')+'T'+(e.time||'23:59')).getTime()-Date.now();if(!Number.isFinite(ms))return 'No date';let days=Math.ceil(ms/86400000);return days<0?'Past':days===0?'Today':days===1?'Tomorrow':days+' days'}
 function examTopicsOptions(e={}){let c=state.courses.find(x=>x.name===v('f_exam_course'));return (c?.topics||[]).map(t=>`<label class="row" style="gap:8px;text-transform:none;font-size:13px"><input type="checkbox" name="examTopic" value="${esc(t.name)}" ${(e.topics||[]).includes(t.name)?'checked':''}>${esc(t.name)}</label>`).join('')||'<span class="small muted">Add topics to this course first.</span>'}
-function examForm(e={}){return `<div class="form-grid"><div class="field full"><label>Exam name</label><input id="f_title" value="${esc(e.title||'')}"></div><div class="field"><label>Course</label><select id="f_exam_course" onchange="document.getElementById('examTopics').innerHTML=examTopicsOptions()">${studyCourseOptions()}</select></div><div class="field"><label>Exam type</label><select id="f_exam_type">${['Midterm','Final','Quiz','Practical','Oral','Presentation','Other'].map(x=>`<option ${e.type===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="field"><label>Date</label><input id="f_date" type="date" value="${esc(e.date||'')}"></div><div class="field"><label>Time</label><input id="f_time" type="time" value="${esc(e.time||'10:00')}"></div><div class="field"><label>Duration (minutes)</label><input id="f_duration" type="number" min="1" value="${e.duration||120}"></div><div class="field full"><label>Location / online link</label><input id="f_location" value="${esc(e.location||'')}"></div><div class="field full"><label>Topics covered</label><div id="examTopics" class="list">${examTopicsOptions(e)}</div></div><div class="field full"><label class="row" style="gap:8px;text-transform:none"><input id="f_exam_notify" type="checkbox" checked> 🔔 Notify me before this exam</label></div><div class="field"><label>Reminder</label><select id="f_exam_notifyLead"><option value="15" selected>15 minutes before</option><option value="60">1 hour before</option><option value="1440">1 day before</option><option value="10080">1 week before</option></select></div><div class="field full"><label>Notes</label><textarea id="f_notes">${esc(e.notes||'')}</textarea></div></div>`}
+function examForm(e={}){return `<div class="form-grid"><div class="field full"><label>Exam name</label><input id="f_title" value="${esc(e.title||'')}"></div><div class="field"><label>Course</label><select id="f_exam_course" onchange="document.getElementById('examTopics').innerHTML=examTopicsOptions()">${studyCourseOptions()}</select></div><div class="field"><label>Exam type</label><select id="f_exam_type">${['Midterm','Final','Quiz','Practical','Oral','Presentation','Other'].map(x=>`<option ${e.type===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="field"><label>Date</label><input id="f_date" type="date" value="${esc(e.date||'')}"></div><div class="field"><label>Time</label><input id="f_time" type="time" value="${esc(e.time||'10:00')}"></div><div class="field"><label>Duration (minutes)</label><input id="f_duration" type="number" min="1" value="${e.duration||120}"></div><div class="field full"><label>Location / online link</label><input id="f_location" value="${esc(e.location||'')}"></div><div class="field full"><label>Topics covered</label><div id="examTopics" class="list">${examTopicsOptions(e)}</div></div><div class="field full"><label>Notes</label><textarea id="f_notes">${esc(e.notes||'')}</textarea></div><div class="field full"><label class="row" style="gap:8px;text-transform:none;font-size:13px"><input id="f_notify" type="checkbox" ${e.notifications!==false?"checked":""}> Notify me before this exam</label></div></div>`}
 function schoolExamsPage(){document.getElementById('content').innerHTML=pageHead('Exams','Track dates, topics, preparation, and countdowns.')+`<div class="actions">${schoolBack()}<button class="btn primary" onclick="addExam()">＋ Exam</button></div><div class="panel" style="margin-top:15px">${state.exams.map((e,i)=>`<div class="item"><div class="item-main"><div class="item-title">${esc(e.title)} <span class="tag">${esc(examCountdown(e))}</span></div><div class="item-meta">${esc(e.course||'')} · ${esc(e.date||'')} ${e.time?'at '+esc(e.time):''} · ${esc(e.type||'Exam')} ${e.location?'· '+esc(e.location):''}</div><div class="small muted">${(e.topics||[]).length} topics covered</div></div><div class="actions"><button class="btn" onclick="editExam(${i})">Edit</button><button class="btn danger" onclick="deleteAt('exams',${i},'School')">Delete</button></div></div>`).join('')||`<div class="empty">No exams scheduled.</div>`}</div>`}
 function schoolTodosPage(){document.getElementById('content').innerHTML=pageHead('School To-do list','Tap the checkbox when you finish something.')+`<div class="actions">${schoolBack()}<button class="btn primary" onclick="addSchoolTodo()">＋ To-do</button></div><div class="panel" style="margin-top:15px">${state.schoolTodos.map((x,i)=>`<div class="item"><input type="checkbox" ${x.done?'checked':''} onchange="state.schoolTodos[${i}].done=this.checked;save();schoolTodosPage()"><div class="item-main"><div style="${x.done?'text-decoration:line-through;opacity:.6':''}"><b>${esc(x.title)}</b></div><div class="item-meta">${esc(x.course||'')}</div></div><button class="btn danger" onclick="deleteAt('schoolTodos',${i},'School')">Delete</button></div>`).join('')||`<div class="empty">Nothing on your school to-do list.</div>`}</div>`}
 function weightedGrade(course){let rows=state.grades.filter(g=>(!course||g.course===course)&&g.score!==null&&g.score!==''&&Number.isFinite(Number(g.score)));let totalWeight=rows.reduce((n,g)=>n+(Number(g.weight)||0),0),weighted=rows.reduce((n,g)=>n+(Number(g.score)/Number(g.outof||100))*100*(Number(g.weight)||0),0);return {value:totalWeight?weighted/totalWeight:0,weight:totalWeight}}
@@ -1353,10 +1354,10 @@ function clearNotebookPage(){
 }
 function renameNotebook(ci,ti,ni,name){if(name.trim()){state.courses[ci].topics[ti].notebooks[ni].name=name.trim();save()}}
 let activeNotebook={ci:0,ti:0,ni:0,pi:0};
-function addAssignment(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>Create assignment</h2>${assignmentForm()}<button class="btn primary" style="margin-top:15px" onclick="let t=v('f_title');if(!t)return alert('Enter an assignment name.');let subtasks=v('f_subtasks').split('\\n').map(x=>x.trim()).filter(Boolean).map(title=>({title,done:false}));state.assignments.push({title:t,course:v('f_course'),topic:v('f_topic'),type:v('f_type'),priority:v('f_priority'),due:v('f_due'),dueTime:v('f_dueTime'),status:v('f_status'),progress:Number(v('f_progress'))||0,notes:v('f_notes'),notifications:document.getElementById('f_notify')?.checked!==false,subtasks});state.tasks.push({title:'Assignment: '+t,due:v('f_due'),dueTime:v('f_dueTime'),notifications:document.getElementById('f_notify')?.checked!==false,done:false});addActivity('Added assignment: '+t);save();closeModal();schoolAssignmentsPage()">Save assignment</button>`)}
+function addAssignment(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>Create assignment</h2>${assignmentForm()}<button class="btn primary" style="margin-top:15px" onclick="let t=v('f_title');if(!t)return alert('Enter an assignment name.');let subtasks=v('f_subtasks').split('\\n').map(x=>x.trim()).filter(Boolean).map(title=>({title,done:false}));state.assignments.push({id:'assignment_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),title:t,course:v('f_course'),topic:v('f_topic'),type:v('f_type'),priority:v('f_priority'),due:v('f_due'),dueTime:v('f_dueTime'),status:v('f_status'),progress:Number(v('f_progress'))||0,notes:v('f_notes'),notifications:document.getElementById('f_notify')?.checked!==false,subtasks});state.tasks.push({title:'Assignment: '+t,due:v('f_due'),dueTime:v('f_dueTime'),notifications:false,done:false});addActivity('Added assignment: '+t);save();closeModal();schoolAssignmentsPage()">Save assignment</button>`)}
 function addExam(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>Create exam</h2>${examForm()}<button class="btn primary" style="margin-top:15px" onclick="saveExam()">Save exam</button>`);setTimeout(()=>{document.getElementById('examTopics').innerHTML=examTopicsOptions()},0)}
 function editExam(i){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>Edit exam</h2>${examForm(state.exams[i])}<div class="actions" style="margin-top:15px"><button class="btn primary" onclick="saveExam(${i})">Save changes</button><button class="btn danger" onclick="deleteAt('exams',${i},'School');closeModal()">Delete</button></div>`);setTimeout(()=>{let s=document.getElementById('f_exam_course');if(s)s.value=state.exams[i].course||'';document.getElementById('examTopics').innerHTML=examTopicsOptions(state.exams[i])},0)}
-function saveExam(i=null){let t=v('f_title');if(!t)return;let topics=[...document.querySelectorAll('input[name="examTopic"]:checked')].map(x=>x.value),e={title:t,course:v('f_exam_course'),type:v('f_exam_type'),date:v('f_date'),time:v('f_time'),duration:Number(v('f_duration'))||120,location:v('f_location'),topics,notes:v('f_notes'),notifications:document.getElementById('f_exam_notify')?.checked!==false,notificationLeadMinutes:Number(v('f_exam_notifyLead'))||15};if(i===null){state.exams.push(e);state.tasks.push({title:'Exam: '+t,due:e.date,done:false,priority:'High'})}else state.exams[i]={...state.exams[i],...e};addActivity('Saved exam: '+t);save();closeModal();schoolExamsPage()}
+function saveExam(i=null){let t=v('f_title');if(!t)return;let topics=[...document.querySelectorAll('input[name="examTopic"]:checked')].map(x=>x.value),e={title:t,course:v('f_exam_course'),type:v('f_exam_type'),date:v('f_date'),time:v('f_time'),duration:Number(v('f_duration'))||120,location:v('f_location'),topics,notes:v('f_notes'),notifications:document.getElementById('f_notify')?.checked!==false};if(i===null){state.exams.push(e);state.tasks.push({title:'Exam: '+t,due:e.date,dueTime:e.time,done:false,priority:'High',notifications:false})}else state.exams[i]={...state.exams[i],...e};addActivity('Saved exam: '+t);save();closeModal();schoolExamsPage()}
 function gradeForm(g={}){return `<div class="form-grid"><div class="field"><label>Course</label><input id="f_course" value="${esc(g.course||'')}"></div><div class="field"><label>Assessment</label><input id="f_assessment" value="${esc(g.assessment||'')}"></div><div class="field"><label>Score</label><input id="f_score" type="number" step=".01" value="${g.score??''}"></div><div class="field"><label>Out of</label><input id="f_outof" type="number" step=".01" value="${g.outof||100}"></div><div class="field"><label>Weight (%)</label><input id="f_weight" type="number" min="0" max="100" step=".1" value="${g.weight??10}"></div><div class="field"><label>Credits (optional)</label><input id="f_credits" type="number" min="0" step=".5" value="${g.credits??''}"></div></div>`}
 function addGrade(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>Add assessment grade</h2>${gradeForm()}<button class="btn primary" style="margin-top:15px" onclick="saveGrade()">Save grade</button>`)}
 function editGrade(i){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>Edit assessment grade</h2>${gradeForm(state.grades[i])}<div class="actions" style="margin-top:15px"><button class="btn primary" onclick="saveGrade(${i})">Save changes</button><button class="btn danger" onclick="deleteAt('grades',${i},'School');closeModal()">Delete</button></div>`)}
@@ -1390,7 +1391,7 @@ function formatStudyTime(ms){let total=Math.max(0,Math.floor(ms/1000)),h=Math.fl
 function studyPhase(s,now){let elapsed=Math.max(0,now-s.startMillis),total=s.endMillis-s.startMillis;if(elapsed>=total)return {name:'Complete',remaining:0};if(!s.breaksEnabled)return {name:'Studying',remaining:s.endMillis-now};let study=s.studyBlockMinutes*60000,pause=s.breakMinutes*60000,cycle=study+pause,within=elapsed%cycle;if(within<study)return {name:'Studying',remaining:Math.min(study-within,total-elapsed)};return {name:'Break',remaining:Math.min(cycle-within,total-elapsed)}}
 function openStudyTimer(id){clearTimeout(window.__studyTimer);let s=(state.studySessions||[]).find(x=>x.id===id);if(!s)return schoolStudyPage();let render=()=>{let now=Date.now(),phase=studyPhase(s,now);if(phase.name==='Complete'){clearTimeout(window.__studyTimer);window.__studyTimer=null;s.status='completed';s.completedAt=s.completedAt||now;save();document.getElementById('content').innerHTML=pageHead('Study session complete','Nice work — your session is saved.')+`<div class="panel" style="text-align:center;padding:35px"><div style="font-size:42px">✨</div><h2>${esc(s.course)}${s.topic?' · '+esc(s.topic):''}</h2><p class="muted">${Math.round(s.durationMinutes/60*10)/10} hours planned</p><div class="actions" style="justify-content:center"><button class="btn primary" onclick="schoolStudyPage()">Back to Study Sessions</button></div></div>`;return}document.getElementById('content').innerHTML=pageHead(phase.name==='Break'?'☕ Study break':'📚 Study session',`${esc(s.course)}${s.topic?' · '+esc(s.topic):''}`)+`<div class="panel" style="text-align:center;padding:35px"><div class="small muted">${new Date(s.startMillis).toLocaleString()}</div><div style="font-size:clamp(48px,10vw,92px);font-weight:850;letter-spacing:.04em;margin:22px 0">${formatStudyTime(phase.remaining)}</div><h2>${phase.name}</h2><p class="muted">${s.breaksEnabled&&phase.name==='Studying'?'Next break will start automatically.':'The timer is based on the session end time.'}</p><div class="actions" style="justify-content:center"><button class="btn" onclick="schoolStudyPage()">Back to sessions</button><button class="btn danger" onclick="endStudySession('${s.id}')">End session</button></div></div>`;window.__studyTimer=setTimeout(render,1000)};render()}
 function endStudySession(id){let s=(state.studySessions||[]).find(x=>x.id===id);if(!s)return;clearTimeout(window.__studyTimer);window.__studyTimer=null;s.endMillis=Math.min(Date.now(),s.endMillis);s.status='ended';s.endedAt=Date.now();save();if(window.AndroidStudy)AndroidStudy.stopStudySession();schoolStudyPage();toast('Study session ended')}
-function addSchoolTodo(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>School to-do</h2><div class="form-grid"><div class="field full"><label>Task</label><input id="f_title"></div><div class="field"><label>Course</label><input id="f_course"></div><div class="field"><label>Due date</label><input id="f_due" type="date"></div><div class="field full"><label class="row" style="gap:8px;text-transform:none;font-size:13px"><input id="f_notify" type="checkbox" checked> Notify me before this to-do is due</label></div></div><button class="btn primary" style="margin-top:15px" onclick="let t=v('f_title');if(!t)return;state.schoolTodos.push({title:t,course:v('f_course'),due:v('f_due'),notifications:document.getElementById('f_notify')?.checked!==false,done:false});state.tasks.push({title:'School: '+t,due:v('f_due'),notifications:document.getElementById('f_notify')?.checked!==false,done:false});save();closeModal();schoolPage()">Save to-do</button>`)}
+function addSchoolTodo(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>School to-do</h2><div class="form-grid"><div class="field full"><label>Task</label><input id="f_title"></div><div class="field"><label>Course</label><input id="f_course"></div><div class="field"><label>Due date</label><input id="f_due" type="date"></div><div class="field"><label>Due time</label><input id="f_dueTime" type="time" value="23:59"></div><div class="field full"><label class="row" style="gap:8px;text-transform:none;font-size:13px"><input id="f_notify" type="checkbox" checked> Notify me before this to-do is due</label></div></div><button class="btn primary" style="margin-top:15px" onclick="let t=v('f_title');if(!t)return;state.schoolTodos.push({id:'schooltodo_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),title:t,course:v('f_course'),due:v('f_due'),dueTime:v('f_dueTime'),notifications:document.getElementById('f_notify')?.checked!==false,done:false});state.tasks.push({title:'School: '+t,due:v('f_due'),notifications:document.getElementById('f_notify')?.checked!==false,done:false});save();closeModal();schoolPage()">Save to-do</button>`)}
 function gpaCalc(){let p=state.grades.map(g=>Number(g.score)/Number(g.outof)*100).filter(Number.isFinite),avg=p.length?p.reduce((a,b)=>a+b,0)/p.length:0;alert("Average percentage from entered grades: "+avg.toFixed(2)+"%\\n\\nFor an exact GPA, use your institution's grade-point scale.")}
 function studyToday(){let x=state.study.filter(s=>s.date===today());alert(x.length?"Study today:\\n\\n"+x.map(s=>"• "+s.course+" — "+s.hours+" hour(s)").join("\\n"):"No study sessions planned for today.")}
 let activeJournalIndex=-1, journalTool='pen';
@@ -1701,6 +1702,8 @@ function settingsPage(){
         <label class="switch-row"><span>⏱ Study sessions</span><input type="checkbox" ${state.notificationSettings?.study!==false?'checked':''} onchange="setNotificationSetting('study',this.checked)"></label>
         <label class="switch-row"><span>📅 Timetable classes</span><input type="checkbox" ${state.notificationSettings?.timetable!==false?'checked':''} onchange="setNotificationSetting('timetable',this.checked)"></label>
         <label class="switch-row"><span>📝 Assignments</span><input type="checkbox" ${state.notificationSettings?.assignments!==false?'checked':''} onchange="setNotificationSetting('assignments',this.checked)"></label>
+        <label class="switch-row"><span>🎓 Exams</span><input type="checkbox" ${state.notificationSettings?.exams!==false?'checked':''} onchange="setNotificationSetting('exams',this.checked)"></label>
+        <label class="switch-row"><span>🗓 Calendar events</span><input type="checkbox" ${state.notificationSettings?.calendar!==false?'checked':''} onchange="setNotificationSetting('calendar',this.checked)"></label>
         <label class="switch-row"><span>✓ To-do / tasks</span><input type="checkbox" ${state.notificationSettings?.todo!==false?'checked':''} onchange="setNotificationSetting('todo',this.checked)"></label>
         <label class="switch-row"><span>↻ DearSelf updates</span><input type="checkbox" ${state.notificationSettings?.updates!==false?'checked':''} onchange="setNotificationSetting('updates',this.checked)"></label>
       </div>
@@ -2010,7 +2013,7 @@ window.addEventListener("DOMContentLoaded",()=>{ try{ auth(); }catch(e){ console
       <div class="panel" style="margin-top:15px"><div class="list">${open.map((x,i)=>{let idx=state.tasks.indexOf(x);return `<div class="item ds-task-row"><input type="checkbox" onchange="toggleTask(${idx})"><div class="item-main"><div class="item-title">${_esc(x.title)}</div><div class="item-meta">${x.due?'Due '+dsDateLabel(x.due):'No deadline'} ${x.priority?' · '+_esc(x.priority):''}${x.category?' · '+_esc(x.category):''}${x.estimated?' · '+_esc(x.estimated)+' min':''}</div></div><span class="tag">${_esc(x.priority||'Normal')}</span><button class="btn ghost" onclick="editTask(${idx})">Edit</button><button class="btn danger" onclick="deleteAt('tasks',${idx},'Tasks')">×</button></div>`}).join('')||'<div class="empty"><strong>Nothing waiting on you.</strong><br>Enjoy that little win.</div>'}</div></div>
       ${done.length?`<div class="panel" style="margin-top:15px"><h2>Completed</h2><div class="list">${done.map(x=>{let idx=state.tasks.indexOf(x);return `<div class="item" style="opacity:.65"><input type="checkbox" checked onchange="toggleTask(${idx})"><div class="item-main"><div class="item-title" style="text-decoration:line-through">${_esc(x.title)}</div><div class="item-meta">Completed</div></div></div>`}).join('')}</div></div>`:''}`;
   }
-  function addTask(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>New task</h2><p class="muted">Give it enough detail that future-you knows exactly what to do.</p><div class="form-grid"><div class="field full"><label>Task</label><input id="f_title" placeholder="e.g. Finish Health Psychology notes"></div><div class="field"><label>Due date</label><input id="f_due" type="date"></div><div class="field"><label>Priority</label><select id="f_priority"><option>Normal</option><option>High</option><option>Urgent</option><option>Low</option></select></div><div class="field"><label>Category</label><select id="f_category"><option>Personal</option><option>School</option><option>Finance</option><option>Health</option><option>Other</option></select></div><div class="field"><label>Estimated time</label><select id="f_estimated"><option value="">Not set</option><option>15</option><option>30</option><option>45</option><option>60</option><option>90</option><option>120</option><option>180</option></select></div><div class="field full"><label>Notes</label><textarea id="f_notes" placeholder="Optional details..."></textarea></div><div class="field full"><label class="row" style="gap:8px;text-transform:none;font-size:13px"><input id="f_notify" type="checkbox" checked> Notify me before this task is due</label></div></div><div class="actions" style="margin-top:18px"><button class="btn primary" onclick="let x=v('f_title');if(!x)return;state.tasks.push({title:x,due:v('f_due'),priority:v('f_priority'),category:v('f_category'),estimated:v('f_estimated'),notes:v('f_notes'),notifications:document.getElementById('f_notify')?.checked!==false,done:false});addActivity('Added task: '+x);save();closeModal();show('Tasks');toast('Task added ♡')">Save task</button></div>`)}
+  function addTask(){modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>New task</h2><p class="muted">Give it enough detail that future-you knows exactly what to do.</p><div class="form-grid"><div class="field full"><label>Task</label><input id="f_title" placeholder="e.g. Finish Health Psychology notes"></div><div class="field"><label>Due date</label><input id="f_due" type="date"></div><div class="field"><label>Due time</label><input id="f_dueTime" type="time" value="23:59"></div><div class="field"><label>Priority</label><select id="f_priority"><option>Normal</option><option>High</option><option>Urgent</option><option>Low</option></select></div><div class="field"><label>Category</label><select id="f_category"><option>Personal</option><option>School</option><option>Finance</option><option>Health</option><option>Other</option></select></div><div class="field"><label>Estimated time</label><select id="f_estimated"><option value="">Not set</option><option>15</option><option>30</option><option>45</option><option>60</option><option>90</option><option>120</option><option>180</option></select></div><div class="field full"><label>Notes</label><textarea id="f_notes" placeholder="Optional details..."></textarea></div><div class="field full"><label class="row" style="gap:8px;text-transform:none;font-size:13px"><input id="f_notify" type="checkbox" checked> Notify me before this task is due</label></div></div><div class="actions" style="margin-top:18px"><button class="btn primary" onclick="let x=v('f_title');if(!x)return;state.tasks.push({id:'task_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),title:x,due:v('f_due'),dueTime:v('f_dueTime'),priority:v('f_priority'),category:v('f_category'),estimated:v('f_estimated'),notes:v('f_notes'),notifications:document.getElementById('f_notify')?.checked!==false,done:false});addActivity('Added task: '+x);save();closeModal();show('Tasks');toast('Task added ♡')">Save task</button></div>`)}
   function editTask(i){const x=state.tasks[i];if(!x)return;modal(`<button class="modal-close" onclick="closeModal()">×</button><h2>Edit task</h2><div class="form-grid"><div class="field full"><label>Task</label><input id="f_title" value="${_esc(x.title)}"></div><div class="field"><label>Due date</label><input id="f_due" type="date" value="${_esc(x.due||'')}"></div><div class="field"><label>Priority</label><select id="f_priority">${['Normal','High','Urgent','Low'].map(vv=>`<option ${x.priority===vv?'selected':''}>${vv}</option>`).join('')}</select></div><div class="field"><label>Category</label><select id="f_category">${['Personal','School','Finance','Health','Other'].map(vv=>`<option ${x.category===vv?'selected':''}>${vv}</option>`).join('')}</select></div><div class="field"><label>Estimated time</label><select id="f_estimated">${['','15','30','45','60','90','120','180'].map(vv=>`<option value="${vv}" ${String(x.estimated||'')===vv?'selected':''}>${vv?vv+' min':'Not set'}</option>`).join('')}</select></div><div class="field full"><label>Notes</label><textarea id="f_notes">${_esc(x.notes||'')}</textarea></div><div class="field full"><label class="row" style="gap:8px;text-transform:none;font-size:13px"><input id="f_notify" type="checkbox" ${x.notifications!==false?"checked":""}> Notify me before this task is due</label></div></div><div class="actions" style="margin-top:15px"><button class="btn primary" onclick="let t=v('f_title');if(!t)return;state.tasks[${i}]={...state.tasks[${i}],title:t,due:v('f_due'),priority:v('f_priority'),category:v('f_category'),estimated:v('f_estimated'),notes:v('f_notes'),notifications:document.getElementById('f_notify')?.checked!==false};save();closeModal();show('Tasks');toast('Task updated')">Save changes</button></div>`)}
   function schoolPage(){document.getElementById('content').innerHTML=pageHead('School','Your academic command center — everything connected.')+`<div class="school-hub-grid">
     ${schoolCard('Courses','📚','Course progress, topics, notes and notebooks.','schoolCoursesPage')}${schoolCard('Assignments','📝','Deadlines, progress, subtasks and priorities.','schoolAssignmentsPage')}${schoolCard('Exams','🎓','Exam dates, countdowns and covered topics.','schoolExamsPage')}${schoolCard('Timetable','📅','Your weekly classes and repeating schedule.','schoolTimetablePage')}${schoolCard('Study Sessions','⏱','Plan focused sessions and track your time.','schoolStudyPage')}${schoolCard('Grades','📊','Assessment scores, weights and averages.','schoolGradesPage')}${schoolCard('Course Notes','✎','Notes organized around your courses.','schoolNotesPage')}${schoolCard('School To-do','✓','Small academic tasks that do not need an assignment.','schoolTodosPage')}</div>
@@ -2455,7 +2458,7 @@ window.addEventListener('load',function(){
 </script>
 
 <script>
-/* DearSelf V45.1 Beta GitHub Pages update checker */
+/* DearSelf V44.1 Beta GitHub Pages update checker */
 
 async function checkForUpdates(silent=false){
   try{
@@ -2619,201 +2622,131 @@ window.changeDearSelfFont=function(font){
 };
 </script>
 
-<script id="dearself-v45-notifications">
-/* DearSelf V45.1 notification engine.
-   IMPORTANT: this module does not touch app state until DOMContentLoaded,
-   so a notification problem can never prevent DearSelf from starting. */
+<script id="dearself-v39-notifications">
+/* DearSelf V39 Beta — local reminder engine */
 (function(){
-  const DEFAULTS={study:true,timetable:true,assignments:true,todo:true,updates:true,
-    calendar:true,exams:true,recurring:true,focus:true,leadMinutes:15,sound:true};
-
-  function safe(fn){try{return fn()}catch(e){console.warn("DearSelf notification:",e);return null}}
-
   function ensure(){
-    if(!window.state)return;
-    state.notificationSettings=Object.assign({},DEFAULTS,state.notificationSettings||{});
-    if(!state._dearselfNotificationSent||typeof state._dearselfNotificationSent!=="object")
-      state._dearselfNotificationSent={};
-    if(!Array.isArray(state.notifications))state.notifications=[];
+    state.notificationSettings=state.notificationSettings||{study:true,timetable:true,assignments:true,exams:true,todo:true,calendar:true,updates:true,leadMinutes:15};
+    if(typeof state.notificationSettings.study!=="boolean")state.notificationSettings.study=true;
+    if(typeof state.notificationSettings.timetable!=="boolean")state.notificationSettings.timetable=true;
+    if(typeof state.notificationSettings.assignments!=="boolean")state.notificationSettings.assignments=true;
+    if(typeof state.notificationSettings.exams!=="boolean")state.notificationSettings.exams=true;
+    if(typeof state.notificationSettings.calendar!=="boolean")state.notificationSettings.calendar=true;
+    if(typeof state.notificationSettings.todo!=="boolean")state.notificationSettings.todo=true;
+    if(typeof state.notificationSettings.updates!=="boolean")state.notificationSettings.updates=true;
+    if(!Number.isFinite(Number(state.notificationSettings.leadMinutes)))state.notificationSettings.leadMinutes=15;
+    state._v39NotificationSent=state._v39NotificationSent||{};
   }
+  ensure();
 
-  function lead(x){
-    const n=Number(x?.notificationLeadMinutes);
-    return Number.isFinite(n)&&n>=0?n:Number(state.notificationSettings.leadMinutes)||15;
-  }
-
-  function due(date,time){
-    if(!date)return NaN;
-    const d=new Date(String(date)+"T"+(time||"23:59"));
-    return d.getTime();
-  }
-
-  function local(title,body,type){
-    safe(()=>typeof dsAddNotification==="function"&&dsAddNotification(title,body,type||"info"));
-  }
-
-  function sound(){
-    if(state.notificationSettings.sound===false)return;
-    safe(()=>{
-      const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-      const ac=window.__dearselfAudio||(window.__dearselfAudio=new AC());
-      if(ac.state!=="running")return;
-      const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime;
-      o.type="sine";o.frequency.setValueAtTime(880,n);o.frequency.setValueAtTime(1175,n+.14);
-      g.gain.setValueAtTime(.0001,n);g.gain.exponentialRampToValueAtTime(.055,n+.02);
-      g.gain.exponentialRampToValueAtTime(.0001,n+.34);
-      o.connect(g);g.connect(ac.destination);o.start(n);o.stop(n+.36);
-    });
-  }
-
-  async function device(title,body,tag){
-    if(!("Notification" in window)||Notification.permission!=="granted")return false;
-    const opts={body,tag,icon:"./icons/icon-192.png",badge:"./icons/icon-192.png",
-      silent:false,data:{dearself:true,tag}};
+  window.setNotificationSetting=function(key,value){
+    ensure(); state.notificationSettings[key]=!!value; save(); toast('Notification setting updated');
+  };
+  window.requestDearSelfNotificationPermission=async function(){
+    if(!('Notification' in window)){toast('This browser does not support device notifications.');return;}
     try{
-      if(navigator.serviceWorker?.ready){
-        const reg=await navigator.serviceWorker.ready;
-        if(reg?.showNotification){await reg.showNotification(title,opts);return true;}
+      const p=await Notification.requestPermission();
+      toast(p==='granted'?'Device notifications enabled ♡':p==='denied'?'Notifications were blocked by the browser.':'Notification permission not changed.');
+    }catch(e){toast('Could not request notification permission.')}
+  };
+
+  function notify(key,title,body,type){
+    ensure();
+    if(state._v39NotificationSent[key])return;
+    state._v39NotificationSent[key]=Date.now();
+    dsAddNotification(title,body,type||'info');
+    try{
+      if('Notification' in window && Notification.permission==='granted'){
+        new Notification(title,{body,tag:'dearself-'+key});
       }
     }catch(e){}
-    try{new Notification(title,opts);return true}catch(e){return false}
+    save();
   }
-
-  function fire(key,title,body,type){
+  function dueMillis(date,time){
+    if(!date)return NaN;
+    let t=time||'23:59';
+    const d=new Date(String(date)+'T'+t);
+    return d.getTime();
+  }
+  function nextClassMillis(x,now){
+    const days=Array.isArray(x.repeatDays)&&x.repeatDays.length?x.repeatDays:[x.day||'Monday'];
+    const startMin=ttTimeToMinutes(x.startTime||x.time);
+    if(startMin===null)return NaN;
+    const today=new Date(now);
+    for(let add=0;add<8;add++){
+      const d=new Date(today); d.setDate(today.getDate()+add);
+      const name=TT_DAYS[(d.getDay()+6)%7];
+      if(days.includes(name) || (x.repeatMode==='weekdays' && d.getDay()>=1 && d.getDay()<=5)){
+        const fire=new Date(d); fire.setHours(Math.floor(startMin/60),startMin%60,0,0);
+        if(fire.getTime()>now)return fire.getTime();
+      }
+    }
+    return NaN;
+  }
+  function run(){
     ensure();
-    if(state._dearselfNotificationSent[key])return;
-    state._dearselfNotificationSent[key]=Date.now();
-    local(title,body,type);sound();
-    device(title,body,"dearself-"+key).catch(()=>{});
-    safe(save);
-  }
+    const now=Date.now(), lead=Math.max(0,Number(state.notificationSettings.leadMinutes)||15)*60000;
 
-  function checkItem(key,title,body,when,item,type){
-    if(!Number.isFinite(when)||when<=Date.now()||item?.notifications===false)return;
-    const trigger=when-Math.max(0,lead(item))*60000;
-    if(trigger<=Date.now())fire(key,title,body,type);
-  }
-
-  function check(){
-    if(!window.state)return;
-    ensure();
-    const now=Date.now();
-
+    if(state.notificationSettings.study){
+      (state.studySessions||[]).forEach(s=>{
+        if(s.notifications===false)return;
+        const when=Number(s.startMillis);
+        if(Number.isFinite(when) && when>now && when-now<=lead+60000){
+          notify('study:'+s.id,'Study session coming up',`${s.course||'Study'}${s.topic?' — '+s.topic:''} starts soon.`,'study');
+        }
+      });
+    }
     if(state.notificationSettings.assignments){
       (state.assignments||[]).forEach((a,i)=>{
-        if(a.status==="Completed"||a.status==="Submitted")return;
-        const when=due(a.due,a.dueTime||"23:59");
-        checkItem("assignment:"+(a.id||i)+":"+when,
-          "Assignment due soon",`${a.title||"Assignment"} is due ${new Date(when).toLocaleString()}`,
-          when,a,"assignment");
+        if(a.notifications===false || a.status==='Completed' || a.status==='Submitted')return;
+        const when=dueMillis(a.due,a.dueTime||'23:59');
+        if(Number.isFinite(when) && when>now && when-now<=lead+60000){
+          notify('assignment:'+((a.id)||i),'Assignment due soon',`${a.title||'Assignment'} is due ${new Date(when).toLocaleString()}.`,'warning');
+        }
       });
     }
     if(state.notificationSettings.exams){
-      (state.exams||[]).forEach((x,i)=>{
-        const when=due(x.date,x.time||"09:00");
-        checkItem("exam:"+(x.id||i)+":"+when,
-          "Exam coming up",`${x.title||"Exam"}${x.course?" · "+x.course:""} is scheduled for ${new Date(when).toLocaleString()}`,
-          when,x,"exam");
+      (state.exams||[]).forEach((e,i)=>{
+        if(e.notifications===false)return;
+        const when=dueMillis(e.date,e.time||'10:00');
+        if(Number.isFinite(when) && when>now && when-now<=lead+60000){
+          notify('exam:'+((e.id)||i),'Exam coming up',`${e.title||'Exam'}${e.course?' · '+e.course:''} is scheduled for ${new Date(when).toLocaleString()}.`,'exam');
+        }
       });
     }
     if(state.notificationSettings.calendar){
-      (state.events||[]).forEach((x,i)=>{
-        const when=due(x.date,x.allDay?"09:00":(x.time||"09:00"));
-        checkItem("calendar:"+(x.id||i)+":"+when,
-          "Calendar event coming up",`${x.title||"Event"} is scheduled for ${new Date(when).toLocaleString()}`,
-          when,x,"calendar");
+      (state.events||[]).forEach((e,i)=>{
+        if(e.notifications===false)return;
+        const when=e.allDay===false && e.time ? dueMillis(e.date,e.time) : dueMillis(e.date,'09:00');
+        if(Number.isFinite(when) && when>now && when-now<=lead+60000){
+          notify('event:'+((e.id)||i),'Event coming up',`${e.title||'Calendar event'} is scheduled for ${new Date(when).toLocaleString()}.`,'calendar');
+        }
       });
     }
     if(state.notificationSettings.todo){
-      (state.tasks||[]).forEach((x,i)=>{
-        if(x.done)return;
-        const when=due(x.due,x.dueTime||"23:59");
-        checkItem("task:"+(x.id||i)+":"+when,
-          "Task reminder",`${x.title||"Task"} is due ${new Date(when).toLocaleString()}`,
-          when,x,"todo");
-      });
-      (state.schoolTodos||[]).forEach((x,i)=>{
-        if(x.done)return;
-        const when=due(x.due,x.dueTime||"23:59");
-        checkItem("schooltodo:"+(x.id||i)+":"+when,
-          "School to-do reminder",`${x.title||"School to-do"} is due ${new Date(when).toLocaleString()}`,
-          when,x,"todo");
-      });
-    }
-    if(state.notificationSettings.study){
-      (state.studySessions||[]).forEach((x,i)=>{
-        const when=Number(x.startMillis);
-        checkItem("study:"+(x.id||i)+":"+when,
-          "Study session coming up",`${x.course||"Study"}${x.topic?" — "+x.topic:""} starts ${new Date(when).toLocaleString()}`,
-          when,x,"study");
+      const items=[...(state.tasks||[]).map((x,i)=>({x,i,kind:'task'})),...(state.schoolTodos||[]).map((x,i)=>({x,i,kind:'schooltodo'}))];
+      items.forEach(({x,i,kind})=>{
+        if(x.notifications===false || x.done)return;
+        const when=dueMillis(x.due,x.dueTime||'23:59');
+        if(Number.isFinite(when) && when>now && when-now<=lead+60000){
+          notify(kind+':'+(x.id||i),'To-do due soon',`${x.title||'Task'} is due ${new Date(when).toLocaleString()}.`,'todo');
+        }
       });
     }
     if(state.notificationSettings.timetable){
       (state.timetable||[]).forEach((x,i)=>{
-        if(x.notifications===false||typeof nextTimetableOccurrence!=="function")return;
-        const when=safe(()=>nextTimetableOccurrence(x,now));
-        if(Number.isFinite(when))checkItem("class:"+(x.id||i)+":"+when,
-          "Class coming up",`${x.course||"Class"} starts ${new Date(when).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})}`,
-          when,x,"timetable");
+        if(x.notifications===false)return;
+        const when=nextClassMillis(x,now);
+        if(Number.isFinite(when) && when-now<=lead+60000){
+          notify('class:'+i+':'+new Date(when).toISOString(),'Class coming up',`${x.course||'Class'} starts at ${new Date(when).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}.`,'timetable');
+        }
       });
     }
   }
-
-  window.setNotificationSetting=function(k,v){ensure();state.notificationSettings[k]=!!v;safe(save);safe(()=>toast("Notification setting updated"))};
-  window.setNotificationLead=function(v){ensure();state.notificationSettings.leadMinutes=Math.max(0,Number(v)||0);safe(save);safe(()=>toast("Reminder timing updated"))};
-
-  window.requestDearSelfNotificationPermission=async function(){
-    ensure();
-    // A user click unlocks audio for later foreground notification sounds.
-    safe(async()=>{
-      const AC=window.AudioContext||window.webkitAudioContext;
-      if(AC){const ac=window.__dearselfAudio||(window.__dearselfAudio=new AC());if(ac.state==="suspended")await ac.resume();}
-    });
-    if(!("Notification" in window)){toast("This browser does not support device notifications.");return "unsupported"}
-    try{
-      const p=await Notification.requestPermission();
-      if(p==="granted"){toast("Device notifications enabled ♡");sound();check()}
-      else if(p==="denied")toast("Notifications are blocked. Allow them in your browser/site settings.");
-      return p;
-    }catch(e){toast("Could not request notification permission.");return "error"}
-  };
-
-  window.testDearSelfNotification=async function(){
-    const p=await requestDearSelfNotificationPermission();
-    if(p==="granted")await device("DearSelf test notification","Your device notifications are working ♡","dearself-test-"+Date.now());
-    else local("DearSelf test notification","Your in-app notifications are working ♡","success");
-  };
-
-  // Best-effort next timetable occurrence using the app's existing timetable helpers.
-  window.nextTimetableOccurrence=function(x,now){
-    if(typeof ttTimeToMinutes!=="function")return NaN;
-    const mins=ttTimeToMinutes(x.startTime||x.time);if(mins==null)return NaN;
-    const days=Array.isArray(x.repeatDays)&&x.repeatDays.length?x.repeatDays:[x.day];
-    for(let a=0;a<15;a++){
-      const d=new Date(now);d.setDate(d.getDate()+a);
-      const name=d.toLocaleDateString(undefined,{weekday:"long"});
-      let ok=days.includes(name);
-      if(x.repeatMode==="weekdays")ok=d.getDay()>=1&&d.getDay()<=5;
-      if(!ok)continue;
-      const key=d.toISOString().slice(0,10);
-      if(x.semesterStart&&key<x.semesterStart)continue;
-      if(x.semesterEnd&&key>x.semesterEnd)continue;
-      const out=new Date(d);out.setHours(Math.floor(mins/60),mins%60,0,0);
-      if(out.getTime()>now)return out.getTime();
-    }
-    return NaN;
-  };
-
-  window.runDearSelfNotifications=check;
-
-  // Everything below is deferred so this module cannot block app startup.
-  window.addEventListener("DOMContentLoaded",()=>{
-    try{
-      ensure();
-      window.__dearSelfNotificationTimer=setInterval(()=>safe(check),15000);
-      setTimeout(()=>safe(check),1200);
-    }catch(e){console.warn("DearSelf notification startup skipped:",e)}
-  },{once:true});
+  window.runDearSelfNotifications=run;
+  setInterval(run,30000);
+  window.addEventListener('load',()=>setTimeout(run,1200));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)run()});
 })();
 </script>
 
@@ -2822,7 +2755,7 @@ window.changeDearSelfFont=function(font){
 (function(){
   try{
     state.fontFamily = DEARSELF_FONTS[state.fontFamily] ? state.fontFamily : 'Inter';
-    state.notificationSettings = Object.assign({study:true,timetable:true,assignments:true,todo:true,leadMinutes:15}, state.notificationSettings||{});
+    state.notificationSettings = Object.assign({study:true,timetable:true,assignments:true,exams:true,todo:true,calendar:true,updates:true,leadMinutes:15}, state.notificationSettings||{});
     save(); cssTheme();
   }catch(e){console.warn('DearSelf V39 migration:',e)}
 })();
@@ -2842,7 +2775,7 @@ window.addEventListener("DOMContentLoaded",function(){
 
 
 
-<!-- DearSelf V45.1 Beta — theme-safe full visual makeover -->
+<!-- DearSelf V44.1 Beta — theme-safe full visual makeover -->
 <style id="dearself-v43-full-makeover">
 html,body{background:var(--bg)!important;color:var(--text)!important}
 body{background-image:var(--bg-image)!important;background-attachment:fixed}
@@ -2910,7 +2843,7 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
     const pad=n=>String(n).padStart(2,'0');
     return `DearSelf backup - ${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}.json`;
   }
-  function backupPayload(){return JSON.stringify({app:'DearSelf',version:window.DEARSELF_VERSION||'V45.1 Beta',createdAt:new Date().toISOString(),data:state},null,2)}
+  function backupPayload(){return JSON.stringify({app:'DearSelf',version:window.DEARSELF_VERSION||'V44.1 Beta',createdAt:new Date().toISOString(),data:state},null,2)}
   async function ensureDirPermission(handle){if(!handle)return false;try{let p=await handle.queryPermission({mode:'readwrite'});if(p==='granted')return true;if(p==='prompt')p=await handle.requestPermission({mode:'readwrite'});return p==='granted'}catch(e){return false}}
   async function cleanupOldBackups(handle){if(!backupSettings().deleteAfter7Days)return;const cutoff=Date.now()-7*24*60*60*1000;try{for await(const entry of handle.values()){if(entry.kind!=='file'||!/^DearSelf backup - .*\.json$/i.test(entry.name))continue;let old=false;try{const f=await entry.getFile();old=f.lastModified<cutoff}catch(e){};if(old)try{await handle.removeEntry(entry.name)}catch(e){}}}catch(e){console.warn('DearSelf backup cleanup failed',e)}}
   async function writeAutomaticBackup(reason='scheduled'){
@@ -3018,7 +2951,7 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
   const originalAddAssignment=window.addAssignment;
   window.addAssignment=function(){
     if(typeof originalAddAssignment==='function')originalAddAssignment();
-    setTimeout(()=>{const btn=[...document.querySelectorAll('#modal .btn.primary')].find(b=>/save assignment/i.test(b.textContent||''));if(!btn||btn.dataset.dsAutoId)return;btn.dataset.dsAutoId='1';const old=btn.getAttribute('onclick')||'';btn.setAttribute('onclick',old.replace("state.assignments.push({title:t,course:v('f_course')", "state.assignments.push({id:'assignment_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),title:t,course:v('f_course')"));},0);
+    setTimeout(()=>{const btn=[...document.querySelectorAll('#modal .btn.primary')].find(b=>/save assignment/i.test(b.textContent||''));if(!btn||btn.dataset.dsAutoId)return;btn.dataset.dsAutoId='1';const old=btn.getAttribute('onclick')||'';btn.setAttribute('onclick',old.replace("state.assignments.push({id:'assignment_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),title:t,course:v('f_course')", "state.assignments.push({id:'assignment_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),title:t,course:v('f_course')"));},0);
   };
   // Best-effort migration for existing assignments.
   (state.assignments||[]).forEach((a,i)=>{if(!a.id)a.id='assignment_'+i+'_'+Date.now().toString(36)});
@@ -3040,8 +2973,8 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
    The app compares normalized numeric versions and never treats its own
    current version as an available update. */
 (function(){
-  const DS_VERSION = "V45.1 Beta";
-  const DS_VERSION_NUMBER = 45.1;
+  const DS_VERSION = "V44.1 Beta";
+  const DS_VERSION_NUMBER = 44.1;
   window.DEARSELF_VERSION = DS_VERSION;
   window.DEARSELF_VERSION_NUMBER = DS_VERSION_NUMBER;
 
@@ -3101,8 +3034,8 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
    the browser and can be annotated/opened externally. Unsupported formats
    fall back safely to the OS-compatible application. */
 (function(){
-  const DS_V44 = "V45.1 Beta";
-  const DS_N44 = 45.1;
+  const DS_V44 = "V44.1 Beta";
+  const DS_N44 = 44.1;
   window.DEARSELF_VERSION = DS_V44;
   window.DEARSELF_VERSION_NUMBER = DS_N44;
 
