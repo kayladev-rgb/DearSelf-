@@ -308,8 +308,8 @@ body{font-family:var(--dearself-selected-font)!important}
 <div id="toast" class="toast"></div><div id="dsHelpBot" class="ds-helpbot" aria-label="DearSelf Help Bot"><div class="ds-hb-head"><div class="ds-hb-avatar">✦</div><div style="min-width:0"><h3>DearSelf Help Bot</h3><div class="small muted">Your in-app helper · can do things for you</div></div><button class="ds-hb-conv-toggle" id="dsHelpConvToggle" type="button" title="Conversations" aria-label="Open conversations">☰</button><span class="ds-hb-badge">BETA</span><button class="ds-hb-close" onclick="toggleHelpBot(false)">×</button></div><div class="ds-hb-layout"><aside id="dsHelpHistory" class="ds-hb-history"><div class="ds-hb-history-top"><button class="ds-hb-new" id="dsHelpNewConversation" type="button">＋ New conversation</button><div id="dsHelpHistoryCount" class="ds-hb-history-count"></div></div><div id="dsHelpConvs" class="ds-hb-convs"></div></aside><div class="ds-hb-chatcol"><div id="dsHelpMsgs" class="ds-hb-msgs"></div><div class="ds-hb-input"><textarea id="dsHelpInput" placeholder="Tell me what you want to do…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendHelpBot()}"></textarea><button class="ds-hb-send" onclick="sendHelpBot()">Send</button></div></div></div></div><button id="dsHelpFab" class="ds-helpbot-fab" onclick="toggleHelpBot()" title="DearSelf Help Bot">✦</button>
 <script>
 
-const DEARSELF_VERSION = "V46.3 Beta";
-const DEARSELF_VERSION_NUMBER = 46.3;
+const DEARSELF_VERSION = "V46.4 Beta";
+const DEARSELF_VERSION_NUMBER = 46.4;
 window.DEARSELF_VERSION = DEARSELF_VERSION;
 window.DEARSELF_VERSION_NUMBER = DEARSELF_VERSION_NUMBER;
 
@@ -2564,7 +2564,7 @@ window.addEventListener('load',function(){
 
 async function checkForUpdates(silent=false){
   try{
-    const r = await fetch('./version.json?ts='+Date.now()+'&build=46.3', {cache:'no-store'});
+    const r = await fetch('./version.json?ts='+Date.now()+'&build=46.4', {cache:'no-store'});
     if(!r.ok) throw new Error('version.json unavailable');
     const v = await r.json();
     const remote = Number(v.versionNumber || 0);
@@ -3271,10 +3271,11 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
   const BACKUP_DB='dearself-backup-settings-v1';
   const BACKUP_STORE='settings';
   const BACKUP_KEY='directory';
-  const DEFAULT_AUTO={enabled:false,intervalMinutes:60,retentionMinutes:0,lastBackupAt:0,directoryName:''};
+  const DEFAULT_AUTO={enabled:false,intervalMinutes:60,retentionMinutes:0,lastBackupAt:0,nextBackupAt:0,directoryName:''};
   state.autoBackup={...DEFAULT_AUTO,...(state.autoBackup||{})};
   state.autoBackup.intervalMinutes=Number(state.autoBackup.intervalMinutes)||60;
   state.autoBackup.retentionMinutes=Number(state.autoBackup.retentionMinutes)||0;
+   state.autoBackup.nextBackupAt=Number(state.autoBackup.nextBackupAt)||0;
   if(state.autoBackup.deleteAfter7Days && !state.autoBackup.retentionMinutes) state.autoBackup.retentionMinutes=7*24*60; // migrate old setting
 
   function backupSettings(){return state.autoBackup||DEFAULT_AUTO}
@@ -3370,7 +3371,7 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
       // Also restore uploaded/embedded files as real files instead of leaving them as
       // data URLs only. The JSON remains complete, so either representation can restore.
       const assets=await writeEmbeddedFiles(handle,snapshot,stamp);
-      cfg.lastBackupAt=Date.now();cfg.directoryName=handle.name||cfg.directoryName||'';
+      cfg.lastBackupAt=Date.now();cfg.nextBackupAt=cfg.lastBackupAt+(Math.max(1,Number(cfg.intervalMinutes)||60)*60000);cfg.directoryName=handle.name||cfg.directoryName||'';
       try{save()}catch(e){console.warn('DearSelf backup metadata save failed',e)}
       await cleanupOldBackups(handle);
       if(reason==='manual'&&typeof toast==='function')toast(`Backup saved ♡ ${assets.count?`(${assets.count} file${assets.count===1?'':'s'} copied)`:''}`);
@@ -3381,7 +3382,7 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
     if(!window.showDirectoryPicker){alert('Folder backup requires a supported browser/app with folder access. You can still use Export backup for a normal file.');return}
     try{const handle=await window.showDirectoryPicker({mode:'readwrite'});if(!(await ensureDirPermission(handle)))return;if(await putBackupDirectory(handle)){const cfg=backupSettings();cfg.directoryName=handle.name||'';save();toast('Backup folder connected ♡');settingsPage()}}catch(e){if(e?.name!=='AbortError')toast('Could not connect that folder.')}
   }
-  async function disconnectBackupFolder(){await clearBackupDirectory();state.autoBackup={...backupSettings(),enabled:false,directoryName:'',lastBackupAt:0};save();settingsPage();toast('Auto backup disconnected')}
+  async function disconnectBackupFolder(){await clearBackupDirectory();state.autoBackup={...backupSettings(),enabled:false,directoryName:'',lastBackupAt:0,nextBackupAt:0};save();settingsPage();toast('Auto backup disconnected')}
   async function manualBackupNow(){
     if(await writeAutomaticBackup('manual'))return;
     // If no folder exists, offer the normal export flow.
@@ -3401,19 +3402,19 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
     return `<div class="panel" style="margin-top:15px"><div class="row between" style="gap:12px;flex-wrap:wrap"><div><h2>💾 Automatic backups</h2><p class="small muted">DearSelf can periodically save a fresh backup into a folder you choose.</p></div><label class="switch-row" style="margin:0"><span>Enable auto backup</span><input type="checkbox" ${c.enabled?'checked':''} onchange="toggleDearSelfAutoBackup(this.checked)"></label></div>
     <div class="ds-additions-grid" style="margin-top:12px">
       <div class="field"><label>Backup folder</label><div class="ds-backup-status"><strong>${esc(c.directoryName||'No folder connected')}</strong><span class="small muted">Backups are named “DearSelf backup - date time.json”.</span></div><div class="actions" style="margin-top:9px"><button class="btn primary" onclick="chooseDearSelfBackupFolder()">${c.directoryName?'Change folder':'Choose folder'}</button>${c.directoryName?'<button class="btn" onclick="disconnectDearSelfBackupFolder()">Disconnect</button>':''}</div></div>
-      <div class="field"><label>How often should DearSelf back up?</label><select onchange="setDearSelfBackupInterval(Number(this.value))"><option value="5" ${customFreq===5?'selected':''}>Every 5 minutes</option><option value="60" ${customFreq===60?'selected':''}>Every hour</option><option value="1440" ${customFreq===1440?'selected':''}>Every 24 hours</option><option value="custom" ${!freqOptions.includes(customFreq)?'selected':''}>Custom…</option></select><div class="actions" style="margin-top:8px"><input id="dsBackupFreqAmount" class="input" type="number" min="0.01" step="0.01" placeholder="e.g. 3.5" value="${!freqOptions.includes(customFreq)?(customFreq/60):''}" style="max-width:130px"><select id="dsBackupFreqUnit"><option value="minutes">minutes</option><option value="hours" selected>hours</option><option value="days">days</option></select><button class="btn" onclick="addCustomDearSelfBackupInterval()">Set custom</button></div><p class="small muted">Current: Every ${formatBackupDuration(customFreq)}.</p></div>
+      <div class="field"><label>How often should DearSelf back up?</label><select id="dsBackupFreqSelect" onchange="setDearSelfBackupInterval(this.value)"><option value="5" ${customFreq===5?'selected':''}>Every 5 minutes</option><option value="60" ${customFreq===60?'selected':''}>Every hour</option><option value="1440" ${customFreq===1440?'selected':''}>Every 24 hours</option><option value="custom" ${!freqOptions.includes(customFreq)?'selected':''}>Custom…</option></select><div class="actions" style="margin-top:8px"><input id="dsBackupFreqAmount" class="input" type="number" min="0.01" step="0.01" placeholder="e.g. 3.5" value="${!freqOptions.includes(customFreq)?(customFreq/60):''}" style="max-width:130px"><select id="dsBackupFreqUnit"><option value="minutes">minutes</option><option value="hours" selected>hours</option><option value="days">days</option></select><button class="btn" onclick="addCustomDearSelfBackupInterval()">Set custom</button></div><p class="small muted">Current: Every ${formatBackupDuration(customFreq)}. Choose <b>Custom…</b> to set your own interval.</p></div>
       <div class="field"><label>When should old backups be cleared?</label><select onchange="setDearSelfBackupRetention(Number(this.value))"><option value="0" ${retention===0?'selected':''}>Keep backups</option><option value="60" ${retention===60?'selected':''}>Clear older than 1 hour</option><option value="1440" ${retention===1440?'selected':''}>Clear older than 24 hours</option><option value="10080" ${retention===10080?'selected':''}>Clear older than 7 days</option><option value="custom" ${retention&&!retOptions.includes(retention)?'selected':''}>Custom…</option></select><div class="actions" style="margin-top:8px"><input id="dsBackupRetentionAmount" class="input" type="number" min="0.01" step="0.01" placeholder="e.g. 24" value="${retention&&!retOptions.includes(retention)?(retention/60):''}" style="max-width:130px"><select id="dsBackupRetentionUnit"><option value="minutes">minutes</option><option value="hours" selected>hours</option><option value="days">days</option></select><button class="btn" onclick="setCustomDearSelfBackupRetention()">Set custom</button></div><p class="small muted">${retention?`Currently clearing backups older than ${formatBackupDuration(retention)}.`:'Backups will not be automatically deleted.'}</p></div>
-    </div><div class="actions" style="margin-top:12px"><button class="btn" onclick="manualDearSelfBackupNow()">Create backup now</button><span class="small muted">${c.lastBackupAt?'Last backup: '+new Date(c.lastBackupAt).toLocaleString():'No automatic backup yet.'}</span></div><p class="small muted" style="margin-top:10px">Only DearSelf-created JSON backups are eligible for automatic cleanup. Your unrelated files are left alone.</p></div>`}
+    </div><div class="actions" style="margin-top:12px"><button class="btn" onclick="manualDearSelfBackupNow()">Create backup now</button><span class="small muted">${c.lastBackupAt?'Last backup: '+new Date(c.lastBackupAt).toLocaleString():'No automatic backup yet.'}${c.enabled&&c.nextBackupAt?' · Next: '+new Date(c.nextBackupAt).toLocaleString():''}</span></div><p class="small muted" style="margin-top:10px">Only DearSelf-created JSON backups are eligible for automatic cleanup. Your unrelated files are left alone.</p></div>`}
   window.chooseDearSelfBackupFolder=chooseBackupFolder;
   window.disconnectDearSelfBackupFolder=disconnectBackupFolder;
   window.manualDearSelfBackupNow=manualBackupNow;
-  window.toggleDearSelfAutoBackup=function(on){const c=backupSettings();c.enabled=!!on;save();if(on){if(!c.directoryName)toast('Choose a backup folder first ♡');else writeAutomaticBackup('scheduled');}settingsPage()};
-  window.setDearSelfBackupInterval=function(m){const c=backupSettings();if(m==='custom')return;c.intervalMinutes=Math.max(1,Number(m)||60);save();toast(`Backup frequency: every ${formatBackupDuration(c.intervalMinutes)} ♡`);settingsPage()};
-  window.addCustomDearSelfBackupInterval=function(){const amount=Number(document.getElementById('dsBackupFreqAmount')?.value);const unit=document.getElementById('dsBackupFreqUnit')?.value||'hours';if(!Number.isFinite(amount)||amount<=0){toast('Enter a valid backup interval.');return}const mult={minutes:1,hours:60,days:1440}[unit]||60;const mins=amount*mult;if(mins<1){toast('Backup interval must be at least 1 minute.');return}backupSettings().intervalMinutes=mins;save();toast(`Custom backup interval set: every ${formatBackupDuration(mins)} ♡`);settingsPage()};
+  window.toggleDearSelfAutoBackup=function(on){const c=backupSettings();c.enabled=!!on;if(on){if(!c.directoryName){c.enabled=false;toast('Choose a backup folder first ♡')}else{c.nextBackupAt=Date.now()+Math.max(1,Number(c.intervalMinutes)||60)*60000;save();toast(`Auto backup on ♡ Next backup in ${formatBackupDuration(c.intervalMinutes)}`)}}else{c.nextBackupAt=0;save();toast('Auto backup off ♡')}settingsPage()};
+  window.setDearSelfBackupInterval=function(m){const c=backupSettings();if(String(m)==='custom'){settingsPage();setTimeout(()=>document.getElementById('dsBackupFreqAmount')?.focus(),0);return}const mins=Math.max(1,Number(m)||60);c.intervalMinutes=mins;c.nextBackupAt=Date.now()+mins*60000;save();toast(`Backup frequency: every ${formatBackupDuration(mins)} ♡`);settingsPage()};
+  window.addCustomDearSelfBackupInterval=function(){const amount=Number(document.getElementById('dsBackupFreqAmount')?.value);const unit=document.getElementById('dsBackupFreqUnit')?.value||'hours';if(!Number.isFinite(amount)||amount<=0){toast('Enter a valid backup interval.');return}const mult={minutes:1,hours:60,days:1440}[unit]||60;const mins=amount*mult;if(mins<1){toast('Backup interval must be at least 1 minute.');return}backupSettings().intervalMinutes=mins;backupSettings().nextBackupAt=Date.now()+mins*60000;save();toast(`Custom backup interval set: every ${formatBackupDuration(mins)} ♡`);settingsPage()};
   window.setDearSelfBackupRetention=function(m){const c=backupSettings();c.retentionMinutes=Math.max(0,Number(m)||0);save();toast(c.retentionMinutes?`Cleanup set: clear backups older than ${formatBackupDuration(c.retentionMinutes)} ♡`:'Backup cleanup disabled ♡');settingsPage()};
   window.setCustomDearSelfBackupRetention=function(){const amount=Number(document.getElementById('dsBackupRetentionAmount')?.value);const unit=document.getElementById('dsBackupRetentionUnit')?.value||'hours';if(!Number.isFinite(amount)||amount<=0){toast('Enter a valid cleanup age.');return}const mult={minutes:1,hours:60,days:1440}[unit]||60;const mins=amount*mult;if(mins<1){toast('Cleanup age must be at least 1 minute.');return}backupSettings().retentionMinutes=mins;save();toast(`Custom cleanup set: ${formatBackupDuration(mins)} ♡`);settingsPage()};
-  window.__dearSelfAutoBackupTick=async function(){const c=backupSettings();if(!c.enabled||!c.directoryName)return;if(!c.lastBackupAt||Date.now()-c.lastBackupAt>=c.intervalMinutes*60000)await writeAutomaticBackup('scheduled')};
-  setInterval(()=>window.__dearSelfAutoBackupTick?.(),60000);
+  window.__dearSelfAutoBackupTick=async function(){const c=backupSettings();if(!c.enabled||!c.directoryName)return;const interval=Math.max(1,Number(c.intervalMinutes)||60);const now=Date.now();if(!c.nextBackupAt)c.nextBackupAt=c.lastBackupAt?c.lastBackupAt+interval*60000:now+interval*60000;if(now>=c.nextBackupAt)await writeAutomaticBackup('scheduled')};
+  setInterval(()=>window.__dearSelfAutoBackupTick?.(),15000);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')window.__dearSelfAutoBackupTick?.()});
 
   // Notebook: make the compatible-app behavior explicit while retaining existing fallbacks.
@@ -3627,8 +3628,8 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
    The app compares normalized numeric versions and never treats its own
    current version as an available update. */
 (function(){
-  const DS_VERSION = "V46.3 Beta";
-  const DS_VERSION_NUMBER = 46.3;
+  const DS_VERSION = "V46.4 Beta";
+  const DS_VERSION_NUMBER = 46.4;
   window.DEARSELF_VERSION = DS_VERSION;
   window.DEARSELF_VERSION_NUMBER = DS_VERSION_NUMBER;
 
@@ -3639,7 +3640,7 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
 
   window.checkForDearSelfUpdate = async function(){
     try{
-      const url = "version.json?ds_version_check=" + Date.now() + "&build=46.3";
+      const url = "version.json?ds_version_check=" + Date.now() + "&build=46.4";
       const res = await fetch(url, {
         cache: "no-store",
         headers: {"Cache-Control":"no-cache"}
@@ -3688,8 +3689,8 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
    the browser and can be annotated/opened externally. Unsupported formats
    fall back safely to the OS-compatible application. */
 (function(){
-  const DS_V44 = "V46.3 Beta";
-  const DS_N44 = 46.3;
+  const DS_V44 = "V46.4 Beta";
+  const DS_N44 = 46.4;
   window.DEARSELF_VERSION = DS_V44;
   window.DEARSELF_VERSION_NUMBER = DS_N44;
 
