@@ -308,8 +308,8 @@ body{font-family:var(--dearself-selected-font)!important}
 <div id="toast" class="toast"></div><div id="dsHelpBot" class="ds-helpbot" aria-label="DearSelf Help Bot"><div class="ds-hb-head"><div class="ds-hb-avatar">✦</div><div style="min-width:0"><h3>DearSelf Help Bot</h3><div class="small muted">Your in-app helper · can do things for you</div></div><button class="ds-hb-conv-toggle" id="dsHelpConvToggle" type="button" title="Conversations" aria-label="Open conversations">☰</button><span class="ds-hb-badge">BETA</span><button class="ds-hb-close" onclick="toggleHelpBot(false)">×</button></div><div class="ds-hb-layout"><aside id="dsHelpHistory" class="ds-hb-history"><div class="ds-hb-history-top"><button class="ds-hb-new" id="dsHelpNewConversation" type="button">＋ New conversation</button><div id="dsHelpHistoryCount" class="ds-hb-history-count"></div></div><div id="dsHelpConvs" class="ds-hb-convs"></div></aside><div class="ds-hb-chatcol"><div id="dsHelpMsgs" class="ds-hb-msgs"></div><div class="ds-hb-input"><textarea id="dsHelpInput" placeholder="Tell me what you want to do…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendHelpBot()}"></textarea><button class="ds-hb-send" onclick="sendHelpBot()">Send</button></div></div></div></div><button id="dsHelpFab" class="ds-helpbot-fab" onclick="toggleHelpBot()" title="DearSelf Help Bot">✦</button>
 <script>
 
-const DEARSELF_VERSION = "V46.1 Beta";
-const DEARSELF_VERSION_NUMBER = 45.6;
+const DEARSELF_VERSION = "V46.3 Beta";
+const DEARSELF_VERSION_NUMBER = 46.3;
 window.DEARSELF_VERSION = DEARSELF_VERSION;
 window.DEARSELF_VERSION_NUMBER = DEARSELF_VERSION_NUMBER;
 
@@ -2564,7 +2564,7 @@ window.addEventListener('load',function(){
 
 async function checkForUpdates(silent=false){
   try{
-    const r = await fetch('./version.json?ts='+Date.now()+'&build=44.8', {cache:'no-store'});
+    const r = await fetch('./version.json?ts='+Date.now()+'&build=46.3', {cache:'no-store'});
     if(!r.ok) throw new Error('version.json unavailable');
     const v = await r.json();
     const remote = Number(v.versionNumber || 0);
@@ -3627,8 +3627,8 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
    The app compares normalized numeric versions and never treats its own
    current version as an available update. */
 (function(){
-  const DS_VERSION = "V46.2 Beta";
-  const DS_VERSION_NUMBER = 46.2;
+  const DS_VERSION = "V46.3 Beta";
+  const DS_VERSION_NUMBER = 46.3;
   window.DEARSELF_VERSION = DS_VERSION;
   window.DEARSELF_VERSION_NUMBER = DS_VERSION_NUMBER;
 
@@ -3639,7 +3639,7 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
 
   window.checkForDearSelfUpdate = async function(){
     try{
-      const url = "version.json?ds_version_check=" + Date.now() + "&build=45.2";
+      const url = "version.json?ds_version_check=" + Date.now() + "&build=46.3";
       const res = await fetch(url, {
         cache: "no-store",
         headers: {"Cache-Control":"no-cache"}
@@ -3688,8 +3688,8 @@ body[data-page="School"] .school-hub-grid .panel{min-height:170px;background:lin
    the browser and can be annotated/opened externally. Unsupported formats
    fall back safely to the OS-compatible application. */
 (function(){
-  const DS_V44 = "V45.4 Beta";
-  const DS_N44 = 45.2;
+  const DS_V44 = "V46.3 Beta";
+  const DS_N44 = 46.3;
   window.DEARSELF_VERSION = DS_V44;
   window.DEARSELF_VERSION_NUMBER = DS_N44;
 
